@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\v1\AdminController;
 use App\Http\Controllers\API\v1\AppointmentController;
 use App\Http\Controllers\API\v1\AuthController;
+use App\Http\Controllers\Api\v1\DashboardKpisController;
 use App\Http\Controllers\API\v1\fileuploadController;
 use App\Http\Controllers\API\v1\NurseController;
 use App\Http\Controllers\API\v1\OperationController;
@@ -40,6 +41,12 @@ route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1', 'm
     Route::get('patientDetails/{id}', [PatientController::class, 'patientDetails']);
     Route::get('getByOperationId/{id}', [OperationController::class, 'getByOperationId']);
     Route::get('uploadsInfo', [fileuploadController::class, 'uploadsInfo']);
+    //Kpis
+    Route::get('getTotalRevenue', [DashboardKpisController::class, 'getTotalRevenue']);
+    Route::get('getAppointments', [DashboardKpisController::class, 'getAppointments']);
+    Route::get('getCanceledAppointments', [DashboardKpisController::class, 'getCanceledAppointments']);
+    Route::get('calculateAgePercentage', [DashboardKpisController::class, 'calculateAgePercentage']);
+    Route::get('TotalPatients', [DashboardKpisController::class, 'TotalPatients']);
 
     Route::delete('deletePaymentDetail/{id}', [OperationController::class, 'deletePaymentDetail']);
 
