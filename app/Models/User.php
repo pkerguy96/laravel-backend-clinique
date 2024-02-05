@@ -49,6 +49,17 @@ class User extends Authenticatable
     {
         return $this->hasMany(Ordonance::class, 'doctor_id');
     }
+    public function payments()
+    {
+        return $this->hasManyThrough(
+            Payement::class,
+            Operation::class,
+            'doctor_id', // Foreign key on operations table
+            'operation_id', // Foreign key on payments table
+            'id', // Local key on doctors table
+            'id' // Local key on operations table
+        );
+    }
     /*  protected static function boot()
     {
         parent::boot();

@@ -47,6 +47,9 @@ route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1', 'm
     Route::get('getCanceledAppointments', [DashboardKpisController::class, 'getCanceledAppointments']);
     Route::get('calculateAgePercentage', [DashboardKpisController::class, 'calculateAgePercentage']);
     Route::get('TotalPatients', [DashboardKpisController::class, 'TotalPatients']);
+    Route::get('appointmentKpipeak', [DashboardKpisController::class, 'appointmentKpipeak']);
+    Route::get('getMonthlyAppointments', [DashboardKpisController::class, 'getMonthlyAppointments']);
+    Route::get('getMonthlyCanceledAppointments', [DashboardKpisController::class, 'getMonthlyCanceledAppointments']);
 
     Route::delete('deletePaymentDetail/{id}', [OperationController::class, 'deletePaymentDetail']);
 

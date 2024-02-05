@@ -11,7 +11,7 @@ use App\Traits\HttpResponses;
 use Symfony\Component\HttpFoundation\Request;
 use Laravel\Sanctum\PersonalAccessToken;
 use Illuminate\Support\Carbon;
-
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -19,27 +19,32 @@ class AuthController extends Controller
 
     public function login(LoginUserRequest $request)
     {
-        $request->validated($request->all());
-        $credentials = $request->only('email', 'password');
-        if (!Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Credentials don\'t match'], 401);
-        }
-        $user = User::where('email', $request->email)->first();
-        if ($user->tokens()->where('tokenable_id', $user->id)->exists()) {
-            $user->tokens()->delete();
-        }
-        $expiresAt = now()->addMinutes(1440); // Set the expiration time to 24 hours from now
+        try {
+            $request->validated($request->all());
+            $credentials = $request->only('email', 'password');
+            if (!Auth::attempt($credentials)) {
+                return response()->json(['message' => "Les informations d'identification ne correspondent pas"], 401);
+            }
+            $user = User::where('email', $request->email)->first();
+            if ($user->tokens()->where('tokenable_id', $user->id)->exists()) {
+                $user->tokens()->delete();
+            }
+            $expiresAt = now()->addMinutes(1440); // Set the expiration time to 24 hours from now
 
-        $token = $user->createToken('Api token of ' . $user->name, ['expires_at' => $expiresAt])->plainTextToken;
-        $url = null;
-        if ($user->profile_picture) {
-            $url = asset("storage/profile_pictures/"  . $user->profile_picture);
+            $token = $user->createToken('Api token of ' . $user->name, ['expires_at' => $expiresAt])->plainTextToken;
+            $url = null;
+            if ($user->profile_picture) {
+                $url = asset("storage/profile_pictures/"  . $user->profile_picture);
+            }
+            return $this->success([
+                'user' => $user,
+                'token' => $token,
+                'profile' => $url,
+            ]);
+        } catch (\Throwable $th) {
+            Log::error($th);
+            return response()->json(["Quelque chose s'est mal passé", $th], 500);
         }
-        return $this->success([
-            'user' => $user,
-            'token' => $token,
-            'profile' => $url,
-        ]);
     }
     public function Verifytoken(Request  $request)
     {

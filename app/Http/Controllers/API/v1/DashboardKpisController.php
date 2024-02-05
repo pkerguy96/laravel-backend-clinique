@@ -3,26 +3,78 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\V1\AppointmentKpi;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\Payement;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
+
 class DashboardKpisController extends Controller
 {
+
     public function getAppointments()
     {
-        $data =  Appointment::all()->count();
+        $doctor = Auth()->id();
+        $data =  Appointment::where('doctor_id', $doctor)->count();
         return response()->json(['data' => $data]);
     }
     public function getCanceledAppointments()
     {
-        $data = Appointment::withTrashed()->whereNotNull('deleted_at')->count();
+        $doctor = Auth()->id();
+        $data = Appointment::where('doctor_id', $doctor)->withTrashed()->whereNotNull('deleted_at')->count();
         return response()->json(['data' => $data]);
+    }
+    public function getMonthlyCanceledAppointments()
+    {
+        $doctorId = auth()->id();
+        $currentYear = Carbon::now()->year;
+        $currentMonth = Carbon::now()->month;
+
+        $monthlyCanceledAppointments = [];
+
+        for ($month = 1; $month <= $currentMonth; $month++) {
+            $currentMonthCanceledAppointments = Appointment::withTrashed()
+                ->where('doctor_id', $doctorId)
+                ->whereYear('date', $currentYear)
+                ->whereMonth('date', $month)
+                ->onlyTrashed() // Only soft-deleted appointments
+                ->count();
+
+            $monthlyCanceledAppointments[] = $currentMonthCanceledAppointments;
+        }
+
+        return response()->json([
+            'data' => $monthlyCanceledAppointments,
+        ]);
+    }
+    public function getMonthlyAppointments()
+    {
+        $doctorId = auth()->id();
+        $currentYear = Carbon::now()->year;
+        $currentMonth = Carbon::now()->month;
+
+        $monthlyAppointments = [];
+
+        for ($month = 1; $month <= $currentMonth; $month++) {
+            $currentMonthAppointments = Appointment::where('doctor_id', $doctorId)
+                ->whereYear('date', $currentYear)
+                ->whereMonth('date', $month)
+                ->count();
+
+            $monthlyAppointments[] = $currentMonthAppointments;
+        }
+
+        return response()->json([
+            'data' => $monthlyAppointments,
+        ]);
     }
     public function getTotalRevenue()
     {
+        $doctor = Auth()->id();
+
         $currentYear = Carbon::now()->year;
         $currentMonth = Carbon::now()->month;
 
@@ -32,18 +84,26 @@ class DashboardKpisController extends Controller
         for ($month = 1; $month <= 12; $month++) {
             if ($currentMonth >= $month) {
 
-                $currentMonthRevenue = Payement::whereYear('created_at', $currentYear)
-                    ->whereMonth('created_at', $month)
-                    ->sum('total_cost');
+                // Get revenue for the current month
+                $currentMonthRevenue = User::find($doctor)->payments()
+                    ->join('operations as o1', 'o1.id', '=', 'payements.operation_id')
+                    ->where('o1.doctor_id', $doctor)
+                    ->whereYear('payements.created_at', $currentYear)
+                    ->whereMonth('payements.created_at', $month)
+                    ->sum('payements.total_cost');
+
                 $data1[] = $currentMonthRevenue;
 
                 // Get revenue for the previous months
-                $previousMonthRevenue = Payement::whereYear('created_at', $currentYear)
-                    ->whereMonth('created_at', $month - 1) // Calculate for the previous month
-                    ->sum('total_cost');
+                $previousMonthRevenue = User::find($doctor)->payments()
+                    ->join('operations as o2', 'o2.id', '=', 'payements.operation_id')
+                    ->where('o2.doctor_id', $doctor)
+                    ->whereYear('payements.created_at', $currentYear)
+                    ->whereMonth('payements.created_at', $month - 1) // Calculate for the previous month
+                    ->sum('payements.total_cost');
+
                 $data2[] = $previousMonthRevenue;
             } else {
-
                 $data1[] = 0;
                 $data2[] = 0;
             }
@@ -51,12 +111,14 @@ class DashboardKpisController extends Controller
 
         return response()->json([
             'data' => [$data1, $data2],
-
         ]);
     }
+
+
     public function calculateAgePercentage()
     {
-        $ageGroups = Patient::selectRaw('CASE 
+        $doctor = Auth()->id();
+        $ageGroups = Patient::where('doctor_id', $doctor)->selectRaw('CASE 
                                 WHEN TIMESTAMPDIFF(YEAR, date, CURDATE()) <= 20 THEN "0-20" 
                                 WHEN TIMESTAMPDIFF(YEAR, date, CURDATE()) <= 30 THEN "21-30" 
                                 WHEN TIMESTAMPDIFF(YEAR, date, CURDATE()) <= 40 THEN "31-40" 
@@ -83,7 +145,16 @@ class DashboardKpisController extends Controller
     }
     public function TotalPatients()
     {
-        $data = Patient::all()->count();
+        $doctor = Auth()->id();
+        $data = Patient::where('doctor_id', $doctor)->count();
         return response()->json(['data' => $data]);
+    }
+    public function appointmentKpipeak()
+    {
+        $appointments = Appointment::latest()->with('patient')->take(5)->get();
+
+        return response()->json([
+            'data' => AppointmentKpi::collection($appointments),
+        ]);
     }
 }

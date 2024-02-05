@@ -14,7 +14,7 @@
             <div id="names" class="w-max flex gap-[2px] rounded-x-core overflow-hidden">
                 <button data-type="Tool" data-name="Scroll" class="flex gap-2 items-center justify-center font-x-core text-sm rounded-sm bg-[#3788d8] text-x-white relative p-2 lg:px-4 h-[36px] lg:h-[42px] aspect-square lg:aspect-auto outline-none hover:!text-x-black hover:bg-x-acent focus-within:!text-x-black focus-within:bg-x-acent">
                     <svg class="block w-4 h-4 lg:w-5 lg:h-5 pointer-events-none" fill="currentcolor" viewBox="0 -960 960 960">
-                        <path d="M480-37 295-221l67-67 72 73v-165h91v165l74-72 66 66L480-37ZM216-300 37-480l180-181 66 66-68 70h165v91H215l67 68-66 66Zm528 0-66-67 68-67H581v-91h165l-68-69 66-66 179 180-179 180ZM434-581v-165l-68 68-66-66 180-179 180 179-66 66-69-68v165h-91Z"/>
+                        <path d="M480-37 295-221l67-67 72 73v-165h91v165l74-72 66 66L480-37ZM216-300 37-480l180-181 66 66-68 70h165v91H215l67 68-66 66Zm528 0-66-67 68-67H581v-91h165l-68-69 66-66 179 180-179 180ZM434-581v-165l-68 68-66-66 180-179 180 179-66 66-69-68v165h-91Z" />
                     </svg>
                 </button>
                 <button data-type="Tool" data-name="ZoomAndPan" class="flex gap-2 items-center justify-center font-x-core text-sm rounded-sm bg-[#3788d8] text-x-white relative p-2 lg:px-4 h-[36px] lg:h-[42px] aspect-square lg:aspect-auto outline-none hover:!text-x-black hover:bg-x-acent focus-within:!text-x-black focus-within:bg-x-acent">
@@ -357,7 +357,7 @@
                 @if(request('iframe'))
                 <a href="{{ url()->current() }}" target="_blank" class="flex gap-2 items-center justify-center font-x-core text-sm rounded-sm bg-[#3788d8] text-x-white relative p-2 lg:px-4 h-[36px] lg:h-[42px] aspect-square lg:aspect-auto outline-none hover:!text-x-black hover:bg-x-acent focus-within:!text-x-black focus-within:bg-x-acent">
                     <svg class="block w-4 h-4 lg:w-5 lg:h-5 pointer-events-none" fill="currentcolor" viewBox="0 -960 960 960">
-<path d="M190-99q-37.175 0-64.088-26.912Q99-152.825 99-190v-580q0-37.588 26.912-64.794Q152.825-862 190-862h267v92H190v580h580v-267h92v267q0 37.175-27.206 64.088Q807.588-99 770-99H190Zm216-243-63-64 364-364H517v-92h345v345h-92v-189L406-342Z"/>
+                        <path d="M190-99q-37.175 0-64.088-26.912Q99-152.825 99-190v-580q0-37.588 26.912-64.794Q152.825-862 190-862h267v92H190v580h580v-267h92v267q0 37.175-27.206 64.088Q807.588-99 770-99H190Zm216-243-63-64 364-364H517v-92h345v345h-92v-189L406-342Z" />
                     </svg>
                 </a>
                 @endif
@@ -370,7 +370,9 @@
     <script src="{{ asset('js/viewer.js') }}"></script>
     <script src="{{ asset('js/extra.js') }}"></script>
     <script>
-        app.loadURLs({!! json_encode($data) !!});
+        app.loadURLs({
+            !!json_encode($data) !!
+        });
     </script>
 </body>
 
