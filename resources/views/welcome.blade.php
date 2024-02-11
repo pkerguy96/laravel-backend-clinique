@@ -370,9 +370,7 @@
     <script src="{{ asset('js/viewer.js') }}"></script>
     <script src="{{ asset('js/extra.js') }}"></script>
     <script>
-        app.loadURLs({
-            !!json_encode($data) !!
-        });
+        app.loadURLs({!! json_encode($data) !!});
     </script>
 </body>
 

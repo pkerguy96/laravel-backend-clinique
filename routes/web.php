@@ -5,7 +5,10 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\API\v1\fileuploadController;
+use App\Http\Controllers\API\v1\PasswordResetController;
 use Laravel\Sanctum\HasApiTokens;
+use App\Http\Middleware\VerifyCsrfToken;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -18,10 +21,15 @@ use Laravel\Sanctum\HasApiTokens;
 |
 */
 
+
 Route::get('/', function () {
     return view('welcome');
 });
+
 Route::get('/file-upload/{id}', [fileuploadController::class, 'show']);
+Route::post('/api/v1/resetlink', [PasswordResetController::class, 'sendResetLinkEmail'])->withoutMiddleware(VerifyCsrfToken::class);
+
+
 Route::get('/setup', function () {
     $credentials = [
         'email' => 'admin@admin.com',
