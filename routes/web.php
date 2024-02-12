@@ -28,6 +28,7 @@ Route::get('/', function () {
 
 Route::get('/file-upload/{id}', [fileuploadController::class, 'show']);
 Route::post('/api/v1/resetlink', [PasswordResetController::class, 'sendResetLinkEmail'])->withoutMiddleware(VerifyCsrfToken::class);
+Route::post('/api/v1/reset', [PasswordResetController::class, 'resetPassword'])->withoutMiddleware(VerifyCsrfToken::class);
 
 
 Route::get('/setup', function () {
@@ -46,7 +47,7 @@ Route::get('/setup', function () {
         $user->role = 'doctor';
         $user->phone_number = '0606060606';
         $user->email = $credentials['email'];
-        $user->password = Hash::make($credentials['password']);
+        $user->password =  bcrypt($credentials['password']);
         $user->save();
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
