@@ -8,12 +8,14 @@ use App\Http\Resources\V1\NurseCollection;
 use App\Http\Resources\V1\NurseResource;
 
 use App\Models\User;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 
 class NurseController extends Controller
 {
+    use HttpResponses;
     /**
      * Display a listing of the resource.
      */
@@ -38,6 +40,9 @@ class NurseController extends Controller
     {
 
         $authenticatedUserId = auth()->user();
+        if ($authenticatedUserId->role === 'nurse') {
+            return $this->error(null, 'Only doctors can create nurses!', 401);
+        }
         $attributes = $request->all();
         $attributes['doctor_id'] = $authenticatedUserId->id;
         $attributes['password'] = Hash::make($attributes['password']);
@@ -74,6 +79,7 @@ class NurseController extends Controller
     public function show(string $id)
     {
         //
+        //TODO: add nurses lol
     }
 
     /**

@@ -6,33 +6,40 @@ namespace App\Http\Controllers\API\v1;
 use App\Traits\FileUpload;
 use App\Http\Controllers\Controller;
 use App\Models\file_upload;
-use App\Models\folder_file_relation;
+
 use App\Models\Patient;
+use App\Models\User;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
-use PhpParser\Node\Stmt\TryCatch;
+
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use ZipArchive;
+use Illuminate\Support\Facades\Auth;
+
+use function Laravel\Prompts\error;
 
 class fileuploadController extends Controller
 {
     use FileUpload;
+    use HttpResponses;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         try {
-            $patientClusters = file_upload::select('cluster', 'folder_path')
-
+            $user = Auth::user();
+            $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
+            $patientClusters = file_upload::where('doctor_id', $id)->select('cluster', 'folder_path')
                 ->groupBy('cluster', 'folder_path')
                 ->get();
             if ($patientClusters->isEmpty()) {
                 return response()->json(['error' => 'No files found for the patient'], 404);
             }
 
-            $sizesByClusters = []; // Separate array for sizes
+
 
             foreach ($patientClusters as $file) {
                 $cluster = $file->cluster;
@@ -62,8 +69,13 @@ class fileuploadController extends Controller
     {
 
         try {
+            $authenticatedUserId = auth()->user();
+            if ($authenticatedUserId->role === 'nurse') {
+                $doctor_id = $authenticatedUserId->doctor_id;
+            } else {
+                $doctor_id = $authenticatedUserId->id;
+            }
 
-            $user = auth()->id();
             if ($request->hasFile('files')) {
 
                 $patient  = Patient::findorfail($request->patient_id);
@@ -78,7 +90,7 @@ class fileuploadController extends Controller
                     $path = $this->UploadFile($uploadedFile, $patientFolder, '', 'public');
 
                     file_upload::create([
-                        'doctor_id' => $user,
+                        'doctor_id' => $doctor_id,
                         'patient_id' => $request->patient_id,
                         'original_name' => $originalFilename,
                         'folder_path' => $path,
@@ -106,24 +118,27 @@ class fileuploadController extends Controller
      */
     public function show(Request $request, string $id)
     {
-
+        //TODO: THIS NEEDS TO BE MORE SECURE IN THE FUTURE
+        $retreived_id = $request->query('userId');
+        $test = User::findorfail($retreived_id);
+        if ($test->role === 'nurse') {
+            $doctor_id = $test->doctor_id;
+        } else {
+            $doctor_id = $test->id;
+        }
         try {
 
-            $patientClusters = file_upload::select('cluster', 'folder_path')
+            $patientClusters = file_upload::where('doctor_id', $doctor_id)->select('cluster', 'folder_path')
                 ->where('cluster', $id)
                 ->groupBy('cluster', 'folder_path')
                 ->get();
+
             if ($patientClusters->isEmpty()) {
-                return response()->json(['error' => 'huh'], 404);
+                return response()->json(['error' => 'empty'], 404);
             }
-
             $data = [];
-
-
             foreach ($patientClusters as $file) {
-
                 $url = asset("storage/" . $file->folder_path);
-
                 $data[] = $url;
             }
 
@@ -138,8 +153,9 @@ class fileuploadController extends Controller
     {
 
         try {
-
-            $patientClusters = file_upload::select('cluster', 'folder_path', 'created_at', 'patient_id', 'type', 'original_name')
+            $user = Auth::user();
+            $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
+            $patientClusters = file_upload::where('doctor_id', $id)->select('cluster', 'folder_path', 'created_at', 'patient_id', 'type', 'original_name')
                 ->groupBy('cluster', 'folder_path', 'created_at', 'patient_id', 'type', 'original_name')
                 ->get();
 
@@ -221,6 +237,22 @@ class fileuploadController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $files = file_upload::where('cluster', $id)->get();
+            if ($files->isEmpty()) {
+                return $this->error(null, 'No cluster found', 404);
+            }
+            foreach ($files as $file) {
+
+                Storage::disk('public')->delete($file->folder_path);
+            }
+            foreach ($files as $file) {
+                $file->delete();
+            }
+            Storage::disk('public')->delete("download_{$files[0]->cluster}.zip");
+            return $this->success(null, 'Files deleted successfully', 200);
+        } catch (\Throwable $th) {
+            return $this->error(null, $th, 404);
+        }
     }
 }

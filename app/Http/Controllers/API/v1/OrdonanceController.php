@@ -24,8 +24,9 @@ class OrdonanceController extends Controller
      */
     public function index()
     {
-
-        $ordonances = ModelsOrdonance::with('OrdonanceDetails', 'Patient')->orderBy('id', 'desc')->get();
+        $user = Auth::user();
+        $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+        $ordonances = ModelsOrdonance::with('OrdonanceDetails', 'Patient')->where('doctor_id', $doctorId)->orderBy('id', 'desc')->get();
 
         return new OrdonanceCollection($ordonances);
     }
@@ -49,11 +50,12 @@ class OrdonanceController extends Controller
 
             // Start a database transaction
             DB::beginTransaction();
-            $user = Auth::user();
 
+            $user = Auth::user();
+            $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
             // Create the Ordonance record
             $ordonance = ModelsOrdonance::create([
-                'doctor_id' => $user->id,
+                'doctor_id' => $doctorId,
                 'patient_id' => $request->input('patient_id'),
                 'date' => $request->input('date'),
             ]);
@@ -113,12 +115,13 @@ class OrdonanceController extends Controller
             $ordonance = ModelsOrdonance::findOrFail($id);
 
             $user = Auth::user();
+            $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
             // Start a database transaction
             DB::beginTransaction();
 
             // Update the Ordonance record with the new data
             $ordonance->update([
-                'doctor_id' => $user->id,
+                'doctor_id' => $doctorId,
                 'patient_id' => $request->input('patient_id'),
                 'date' => $request->input('date'),
                 // Add any other fields you want to update

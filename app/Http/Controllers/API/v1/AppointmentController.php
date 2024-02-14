@@ -8,6 +8,7 @@ use App\Http\Resources\V1\AppointmentResource;
 use App\Models\Appointment;
 use Illuminate\Http\Request;
 use App\Http\Resources\V1\AppointmentCollection;
+use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {
@@ -16,7 +17,14 @@ class AppointmentController extends Controller
      */
     public function index()
     {
-        return new AppointmentCollection(Appointment::orderby('id', 'desc')->get());
+        $user = Auth::user();
+        $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+
+        return new AppointmentCollection(
+            Appointment::where('doctor_id', $doctorId)
+                ->orderBy('id', 'desc')
+                ->get()
+        );
     }
 
     /**
@@ -33,6 +41,7 @@ class AppointmentController extends Controller
     public function store(AppointmentRequest $request)
     {
         $appointment_date = $request->input('date');
+        //TODO: this date neets to fixed
         $existingAppointment = Appointment::where('date', $appointment_date)->first();
         if ($existingAppointment) {
             return response()->json([
@@ -40,8 +49,13 @@ class AppointmentController extends Controller
             ], 422); // Return an appropriate HTTP status code (Unprocessable Entity) for validation error
         }
         $authenticatedUserId = auth()->user();
+        if ($authenticatedUserId->role === 'nurse') {
+            $doctor_id = $authenticatedUserId->doctor_id;
+        } else {
+            $doctor_id = $authenticatedUserId->id;
+        }
         $attributes = $request->all();
-        $attributes['doctor_id'] = $authenticatedUserId->id;
+        $attributes['doctor_id'] = $doctor_id;
 
         $data = new AppointmentResource(Appointment::create($attributes));
 

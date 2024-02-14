@@ -34,7 +34,7 @@ class PatientFactory extends Factory
             "WAFA ASURANCE",
         ];
         return [
-            'doctor_id' => 1,
+            'doctor_id' => 4,
             'nom' => $this->faker->firstName,
             'prenom' => $this->faker->lastName,
             'cin' => $this->faker->unique()->ean13,

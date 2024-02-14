@@ -3,21 +3,15 @@
 namespace App\Http\Controllers\API\v1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\OperationDetailRequest;
-use App\Http\Requests\V1\OperationRequest;
-use App\Http\Requests\V1\PayementRequest;
 use App\Http\Resources\V1\OperationCollection;
-use App\Http\Resources\V1\OperationDetailResource;
 use App\Http\Resources\V1\OperationResource;
 use App\Http\Resources\V1\PayementResource;
 use App\Models\Operation;
 use App\Models\OperationDetail;
 use App\Models\Payement;
-use App\Models\Quote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 
 use Illuminate\Support\Facades\Log;
@@ -29,8 +23,9 @@ class OperationController extends Controller
      */
     public function index()
     {
-        $doctor_id = Auth()->id();
-        $operations = Operation::where('doctor_id', $doctor_id)->with('payments', 'operationdetails')->orderBy('id', 'desc')->get();
+        $user = Auth::user();
+        $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+        $operations = Operation::where('doctor_id', $doctorId)->with('payments', 'operationdetails')->orderBy('id', 'desc')->get();
         return new OperationCollection($operations);
     }
 
@@ -94,9 +89,8 @@ class OperationController extends Controller
                 throw new ValidationException($validator);
             }
 
-
-
             $user = Auth::user();
+            $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
             $data = $request->json()->all();
             $calculator = 0;
             foreach ($data['operations'] as $item) {
@@ -104,7 +98,7 @@ class OperationController extends Controller
             }
             DB::beginTransaction();
             $operation = Operation::create([
-                'doctor_id' => $user->id,
+                'doctor_id' => $doctorId,
                 'patient_id' => $data['patient_id'],
                 'total_cost' => $calculator,
                 'is_paid' => $data['is_paid'],
@@ -218,26 +212,26 @@ class OperationController extends Controller
      */
     public function destroy(string $id)
     {
-        $doctor_id = Auth()->id();
-        Operation::where('doctor_id', $doctor_id)->findorfail($id)->delete();
+        $user = Auth::user();
+        $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+        Operation::where('doctor_id', $doctorId)->findorfail($id)->delete();
         return response()->json(['message' => 'Operation deleted successfully'], 204);
     }
     public function getByOperationId($operationId)
     {
-        $doctor_id = Auth()->id();
-        $operation = Operation::where('id', $operationId)->where('doctor_id', $doctor_id)->first();
+        $user = Auth::user();
+        $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+        $operation = Operation::where('id', $operationId)->where('doctor_id', $doctorId)->first();
 
         // Transform the result using the resource
         return new OperationResource($operation);
     }
     public function deletePaymentDetail($id)
     {
-
-        $doctor_id = Auth()->id();
-
-
-        Payement::whereHas('operation', function ($query) use ($doctor_id) {
-            $query->where('doctor_id', $doctor_id);
+        $user = Auth::user();
+        $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+        Payement::whereHas('operation', function ($query) use ($doctorId) {
+            $query->where('doctor_id', $doctorId);
         })->findOrFail($id)->delete();
 
         return response()->json(['message' => 'Payment deleted successfully'], 204);

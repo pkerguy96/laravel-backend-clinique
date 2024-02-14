@@ -19,9 +19,10 @@ class PatientController extends Controller
     //TODO: CIN FIX CHECK AGE IF REQUIRED OR NOT 
     public function index()
     {
-        $doctor_id = Auth()->id();
+        $user = Auth::user();
+        $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
 
-        return new PatientCollection(Patient::with('appointments', 'Ordonance')->where('doctor_id', $doctor_id)->orderBy('id', 'desc')->get());
+        return new PatientCollection(Patient::with('appointments', 'Ordonance')->where('doctor_id', $id)->orderBy('id', 'desc')->get());
     }
 
     /**
@@ -38,11 +39,11 @@ class PatientController extends Controller
     public function store(StorePatientRequest $request)
     {
         try {
-            // Attempt to create a new patient based on the validated request data
-            $doctor_id = Auth()->id();
+            $user = Auth::user();
+            $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
 
             $requestData = $request->all();
-            $requestData['doctor_id'] = $doctor_id;
+            $requestData['doctor_id'] = $id;
 
             $data = new PatientResource(Patient::create($requestData));
 
@@ -65,12 +66,14 @@ class PatientController extends Controller
      */
     public function show(string $id)
     {
-        $doctor_id = Auth()->id();
-        return  new PatientResource(Patient::where('id', $id)->where('doctor_id', $doctor_id)->first());
+        $user = Auth::user();
+        $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
+        return  new PatientResource(Patient::where('id', $id)->where('doctor_id', $id)->first());
     }
     public function patientDetails(string $id)
     {
-        $doctor_id = Auth()->id();
+        $user = Auth::user();
+        $doctor_id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
         return  new PatientDetailResource(Patient::with('appointments', 'operations')->where('id', $id)->where('doctor_id', $doctor_id)->first());
     }
 
@@ -86,7 +89,8 @@ class PatientController extends Controller
      */
     public function update(StorePatientRequest $request, string $id)
     {
-        $doctor_id = Auth()->id();
+        $user = Auth::user();
+        $doctor_id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
         $patient = Patient::where('doctor_id', $doctor_id)->findOrFail($id);
 
         if (!$patient) {
@@ -112,7 +116,8 @@ class PatientController extends Controller
      */
     public function destroy(string $id)
     {
-        $doctor_id = Auth()->id();
+        $user = Auth::user();
+        $doctor_id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
         Patient::where('doctor_id', $doctor_id)->findorfail($id)->delete();
         return response()->json(['message' => 'patient deleted successfully'], 204);
     }

@@ -20,8 +20,8 @@ class AppointmentFactory extends Factory
     public function definition(): array
     {
         return [
-            'doctor_id' => 1, // Set the doctor_id to 1
-            'patient_id' => $this->faker->unique()->numberBetween(1, 20), // Adjust the range as needed
+            'doctor_id' => 4, // Set the doctor_id to 1
+            'patient_id' => $this->faker->unique()->numberBetween(44, 63), // Adjust the range as needed
             'title' => $this->faker->sentence,
             'date' => $this->faker->dateTimeThisMonth,
             'note' => $this->faker->sentence,
