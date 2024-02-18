@@ -94,7 +94,10 @@ class OrdonanceController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $user = Auth::user();
+        $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+        $data = ModelsOrdonance::with('OrdonanceDetails', 'Patient')->where('doctor_id', $doctorId)->where('id', $id)->first();
+        return response()->json(['data' => $data], 200);
     }
 
     /**
@@ -110,6 +113,7 @@ class OrdonanceController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        Log::error($request->all());
         try {
             // Find the Ordonance record by ID
             $ordonance = ModelsOrdonance::findOrFail($id);

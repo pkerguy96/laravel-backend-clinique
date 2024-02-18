@@ -50,7 +50,7 @@ class OperationController extends Controller
                 'is_paid' => 'required|boolean',
                 'note' => 'nullable|string',
                 'patient_id' => 'required|integer|exists:patients,id',
-                'amount_paid' => 'nullable|numeric|min:0.01',
+                'amount_paid' => 'nullable|numeric',
                 'operations' => 'required|array',
                 'operations.*.operation_type' => 'required|numeric',
                 'operations.*.price' => 'required|numeric|between:0,9999999.99',
@@ -67,7 +67,7 @@ class OperationController extends Controller
                 'patient_id.exists' => 'Le patient sélectionné n\'existe pas.',
 
                 'amount_paid.numeric' => 'Le champ "amount_paid" doit être un nombre.',
-                'amount_paid.min' => 'Le champ "amount_paid" doit être d\'au moins :min.',
+
 
                 'operations.required' => 'Le champ "operations" est requis.',
                 'operations.array' => 'Le champ "operations" doit être un tableau.',
@@ -105,7 +105,7 @@ class OperationController extends Controller
                 'note' =>  $data['note'],
             ]);
             foreach ($data['operations'] as $item) {
-                $operationDetail = OperationDetail::create([
+                OperationDetail::create([
                     'operation_id' =>  $operation->id,
                     'tooth_id' => implode(',', $item['tooth_id']),
                     'operation_type' => $item['operation_type'],
@@ -113,7 +113,7 @@ class OperationController extends Controller
                 ]);
             }
 
-            $payment = Payement::create([
+            Payement::create([
                 'operation_id' =>  $operation->id,
                 'total_cost' => $calculator,
                 'amount_paid' => $data['is_paid'] ? $calculator : $data['amount_paid'],
@@ -161,17 +161,19 @@ class OperationController extends Controller
 
             $operation = Operation::findorfail($id);
             if ($operation) {
-                $sumAmountPaid = Payement::where('operation_id', $id)->sum('amount_paid');
-                $totalCost = $operation->total_cost;
-                $amountPaid = $request->amount_paid;
+                $sumAmountPaid = (float)Payement::where('operation_id', $id)->sum('amount_paid');
+                $totalCost = (float)$operation->total_cost;
+                $amountPaid = (float)$request->amount_paid;
+
                 if (!isset($amountPaid) || empty($amountPaid)) {
                     return response()->json(['error' => 'Le montant payé est requis'], 400);
                 }
                 if ($amountPaid > $totalCost) {
+
                     // The amount paid exceeds the total cost
                     return response()->json(['error' => "Le montant payé dépasse le coût total."], 400);
                 } elseif ($sumAmountPaid + $amountPaid > $totalCost) {
-                    // The total amount paid after the new payment would exceed the total cost
+
                     return response()->json(['error' => "Le montant total payé dépasse le coût total."], 400);
                 } elseif ($sumAmountPaid + $amountPaid <= $totalCost) {
 
@@ -180,19 +182,7 @@ class OperationController extends Controller
                         'total_cost' => $totalCost,
                         'amount_paid' => $amountPaid,
                     ]);
-                    $operation->update(['is_paid' => 0]);
-                    return response()->json([
-                        'message' => "Paiement ajouté avec succès.",
-                        'data' => new PayementResource($payement)
-                    ]);
-                } elseif ($sumAmountPaid + $amountPaid === $totalCost) {
-                    // All paid for
-                    $payement =   Payement::create([
-                        'operation_id' => $operation->id,
-                        'total_cost' => $totalCost,
-                        'amount_paid' => $amountPaid,
-                    ]);
-                    $operation->update(['is_paid' => 1]);
+                    $operation->update(['is_paid' => $sumAmountPaid + $amountPaid === $totalCost ? 1 : 0]);
                     return response()->json([
                         'message' => "Paiement ajouté avec succès.",
                         'data' => new PayementResource($payement)

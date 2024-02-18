@@ -66,12 +66,14 @@ class PatientController extends Controller
      */
     public function show(string $id)
     {
+
         $user = Auth::user();
-        $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
-        return  new PatientResource(Patient::where('id', $id)->where('doctor_id', $id)->first());
+        $doctor_id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
+        return  new PatientResource(Patient::where('id', $id)->where('doctor_id', $doctor_id)->first());
     }
     public function patientDetails(string $id)
     {
+
         $user = Auth::user();
         $doctor_id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
         return  new PatientDetailResource(Patient::with('appointments', 'operations')->where('id', $id)->where('doctor_id', $doctor_id)->first());

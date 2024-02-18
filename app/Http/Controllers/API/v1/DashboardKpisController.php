@@ -19,6 +19,7 @@ class DashboardKpisController extends Controller
     {
         $user = Auth::user();
         $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
+
         $data =  Appointment::where('doctor_id', $id)->count();
         return response()->json(['data' => $data]);
     }
@@ -38,7 +39,7 @@ class DashboardKpisController extends Controller
 
         $monthlyCanceledAppointments = [];
 
-        for ($month = 1; $month <= $currentMonth; $month++) {
+        for ($month = 1; $month <= 12; $month++) {
             $currentMonthCanceledAppointments = Appointment::withTrashed()
                 ->where('doctor_id', $id)
                 ->whereYear('date', $currentYear)
@@ -62,7 +63,7 @@ class DashboardKpisController extends Controller
 
         $monthlyAppointments = [];
 
-        for ($month = 1; $month <= $currentMonth; $month++) {
+        for ($month = 1; $month <= 12; $month++) {
             $currentMonthAppointments = Appointment::where('doctor_id', $id)
                 ->whereYear('date', $currentYear)
                 ->whereMonth('date', $month)
