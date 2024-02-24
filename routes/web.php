@@ -33,29 +33,27 @@ Route::post('/api/v1/reset', [PasswordResetController::class, 'resetPassword'])-
 
 Route::get('/setup', function () {
     $credentials = [
-        'email' => 'admin@admin.com',
+        'email' => 'admin1@admin.com',
         'password' => 'password',
     ];
     if (!Auth::attempt($credentials)) {
         $user = new User();
         $user->nom = 'Admin';
         $user->prenom = 'Admin';
-        $user->cin = 'Admin';
+        $user->cin = 'Adfffmin';
         $user->date = '2023-12-31';
         $user->address = 'Admin';
         $user->sex = 'male';
         $user->role = 'doctor';
-        $user->phone_number = '0606060606';
+        $user->phone_number = '066060606';
         $user->email = $credentials['email'];
         $user->password =  bcrypt($credentials['password']);
         $user->save();
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
-            $adminToken = $user->createToken('admin-token');
-            $basicToken = $user->createToken('basic-token', ['create', 'update']);
+
             return [
-                'admin' => $adminToken->plainTextToken,
-                'basic' => $basicToken->plainTextToken,
+                'user' => $user
             ];
         }
     }

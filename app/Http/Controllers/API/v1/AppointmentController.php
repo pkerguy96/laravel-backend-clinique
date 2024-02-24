@@ -41,7 +41,7 @@ class AppointmentController extends Controller
     public function store(AppointmentRequest $request)
     {
         $appointment_date = $request->input('date');
-        //TODO: this date neets to fixed
+        //TODO: this date neets to fixed // cant insert past dates
         $existingAppointment = Appointment::where('date', $appointment_date)->first();
         if ($existingAppointment) {
             return response()->json([

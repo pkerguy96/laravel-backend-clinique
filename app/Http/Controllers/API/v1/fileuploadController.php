@@ -143,7 +143,7 @@ class fileuploadController extends Controller
             }
 
 
-            return view('welcome', compact('data'));
+            return view('welcome', compact('data', 'doctor_id'));
         } catch (\Throwable $th) {
             Log::error($th);
             return response()->json(['error' => 'An error occurred while retrieving the file URLs'], 500);

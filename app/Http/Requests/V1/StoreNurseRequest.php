@@ -34,7 +34,8 @@ class StoreNurseRequest extends FormRequest
             ],
             'address' => ['required'],
             'sex' => ['required', Rule::in(['male', 'female'])],
-            'phone_number' => ['required', 'numeric'],
+            'phone_number' => ['required', 'numeric', 'digits_between:8,12'],
+            'phone_number.digits_between' => 'Le champ numéro de téléphone doit être composé d\'un nombre de chiffres compris entre :min et :max.',
 
         ];
     }

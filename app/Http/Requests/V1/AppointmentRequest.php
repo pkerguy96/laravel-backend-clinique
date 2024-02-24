@@ -25,7 +25,7 @@ class AppointmentRequest extends FormRequest
 
             'patient_id' => 'required|integer',
             'title' => 'required|string|max:255',
-            'date' => 'required',
+            'date' => ['required', 'date', 'after_or_equal:today'],
             'note' => 'nullable|string|max:255',
         ];
     }
@@ -35,8 +35,10 @@ class AppointmentRequest extends FormRequest
             'patient_id.required' => 'Le nom de patient est requis.',
             'title.required' => 'Le titre est requis.',
             'date.required' => 'La date de naissance est requise.',
-            'date.date' => 'La date de naissance doit être une date valide.',
 
+            'date.required' => 'La date est requise.',
+            'date.date' => 'La date doit être une date valide.',
+            'date.after_or_equal' => 'La date doit être égale ou postérieure à la date actuelle.',
         ];
     }
 }

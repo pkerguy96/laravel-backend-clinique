@@ -354,8 +354,10 @@
                         <path d="M480.256-342q-8.399 0-17.849-3.773Q452.957-349.545 447-356L288-516q-14-12.364-13.708-31.208.291-18.844 14.317-32.363Q301.4-593.154 321-592.577 340.6-592 354-579l81 81v-278q0-19.65 12.86-32.825Q460.719-822 480.36-822 500-822 513-808.825T526-776v278l82-81q12.667-13 30.748-13.657 18.082-.657 32.411 12.577Q684-567 684-547.682q0 19.318-13 33.682L513-356q-5.81 6.455-15.221 10.227Q488.368-342 480.256-342ZM230-139q-37.175 0-64.087-26.913Q139-192.825 139-230v-98q0-18.375 12.86-31.688Q164.719-373 184.36-373 204-373 217-359.688q13 13.313 13 31.688v98h500v-98q0-18.375 13.56-31.688Q757.119-373 775.772-373q20.053 0 33.14 13.312Q822-346.375 822-328v98q0 37.175-27.206 64.087Q767.588-139 730-139H230Z" />
                     </svg>
                 </button>
+              
+
                 @if(request('iframe'))
-                <a href="{{ url()->current() }}" target="_blank" class="flex gap-2 items-center justify-center font-x-core text-sm rounded-sm bg-[#3788d8] text-x-white relative p-2 lg:px-4 h-[36px] lg:h-[42px] aspect-square lg:aspect-auto outline-none hover:!text-x-black hover:bg-x-acent focus-within:!text-x-black focus-within:bg-x-acent">
+                <a href="{{ url()->current() }}?userId={{ $doctor_id }}" target="_blank" class="flex gap-2 items-center justify-center font-x-core text-sm rounded-sm bg-[#3788d8] text-x-white relative p-2 lg:px-4 h-[36px] lg:h-[42px] aspect-square lg:aspect-auto outline-none hover:!text-x-black hover:bg-x-acent focus-within:!text-x-black focus-within:bg-x-acent">
                     <svg class="block w-4 h-4 lg:w-5 lg:h-5 pointer-events-none" fill="currentcolor" viewBox="0 -960 960 960">
                         <path d="M190-99q-37.175 0-64.088-26.912Q99-152.825 99-190v-580q0-37.588 26.912-64.794Q152.825-862 190-862h267v92H190v580h580v-267h92v267q0 37.175-27.206 64.088Q807.588-99 770-99H190Zm216-243-63-64 364-364H517v-92h345v345h-92v-189L406-342Z" />
                     </svg>
@@ -370,7 +372,8 @@
     <script src="{{ asset('js/viewer.js') }}"></script>
     <script src="{{ asset('js/extra.js') }}"></script>
     <script>
-        app.loadURLs({!! json_encode($data) !!});
+   
+app.loadURLs({!! json_encode($data) !!});
     </script>
 </body>
 

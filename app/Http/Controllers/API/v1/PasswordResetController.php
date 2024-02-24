@@ -31,13 +31,14 @@ class PasswordResetController extends Controller
         $token = Str::random(20);
 
         $row = DB::table('password_reset_tokens')->where('email', $user->email)->first();
-
+        Log::info($row);
         if (!$row) {
             DB::table('password_reset_tokens')->insert([
                 'email' => $user->email,
                 'token' => $token,
                 'created_at' => Carbon::now()
             ]);
+            Log::info('tokencreated');
         } else {
             DB::table('password_reset_tokens')->where('email', $user->email)->update([
                 'token' => $token,
@@ -49,6 +50,7 @@ class PasswordResetController extends Controller
 
             $mail = new PasswordReset(['to' => [$user->email], 'token' => $token]);
             Mail::send($mail);
+            Log::info('mail', $mail);
             return  response()->json(['message' => 'Reset link sent to your email'], 200);
         } catch (\Exception $e) {
             Log::error($e);

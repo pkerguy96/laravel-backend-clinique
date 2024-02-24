@@ -71,4 +71,18 @@ class User extends Authenticatable
             }
         });
     } */
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Listen for the creating event to assign roles
+        static::created(function ($user) {
+            // Create a new user preference row when a user is created
+            UserPreference::create([
+                'doctor_id' => $user->id,
+                'kpi_date' => 'monthly',
+            ]);
+        });
+    }
 }
