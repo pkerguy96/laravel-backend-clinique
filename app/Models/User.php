@@ -81,7 +81,7 @@ class User extends Authenticatable
             // Create a new user preference row when a user is created
             UserPreference::create([
                 'doctor_id' => $user->id,
-                'kpi_date' => 'monthly',
+                'kpi_date' => 'year',
             ]);
         });
     }

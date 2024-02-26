@@ -10,6 +10,7 @@ use App\Http\Controllers\API\v1\OperationController;
 use App\Http\Controllers\API\v1\OrdonanceController;
 use App\Http\Controllers\API\v1\PatientController;
 use App\Http\Controllers\API\v1\StockController;
+use App\Http\Controllers\API\v1\UserPreferenceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 // Add this function to handle OPTIONS requests for CORS
@@ -33,7 +34,7 @@ route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1'], f
     route::post('/login', [AuthController::class, 'login']);
     route::get('/verify-token', [AuthController::class, 'Verifytoken']);
 });
-route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1', 'middleware' => 'auth:sanctum'], function () {
+route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1', 'middleware' => ['auth:sanctum', 'check.termination']], function () {
     Route::get('Admin/profile', [AdminController::class, 'getpicture']);
     Route::get('Admin/logout', [AuthController::class, 'Logout']);
     Route::post('Admin/store/profile', [AdminController::class, 'storeprofile']);
@@ -50,8 +51,9 @@ route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1', 'm
     Route::get('appointmentKpipeak', [DashboardKpisController::class, 'appointmentKpipeak']);
     Route::get('getMonthlyAppointments', [DashboardKpisController::class, 'getMonthlyAppointments']);
     Route::get('getMonthlyCanceledAppointments', [DashboardKpisController::class, 'getMonthlyCanceledAppointments']);
-
+    route::post('DashboardKpiUserPref', [UserPreferenceController::class, 'DashboardKpiUserPref']);
     Route::delete('deletePaymentDetail/{id}', [OperationController::class, 'deletePaymentDetail']);
+    Route::get('PayementVerificationCheckout/{id}', [OperationController::class, 'PayementVerificationCheckout']);
 
 
 

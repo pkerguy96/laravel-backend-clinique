@@ -44,9 +44,17 @@ class NurseController extends Controller
             return $this->error(null, 'Only doctors can create nurses!', 401);
         }
         $attributes = $request->all();
+        $attributes = $request->except('checkbox');
         $attributes['doctor_id'] = $authenticatedUserId->id;
         $attributes['password'] = Hash::make($attributes['password']);
         $attributes['role'] = 'nurse';
+        if ($request->input('checkbox') === true) {
+
+            $attributes['termination_date'] = null;
+        } else {
+
+            $attributes['termination_date'] = $request->input('termination_date');
+        }
         try {
             $nurseCount = User::where('doctor_id', $authenticatedUserId->id)
                 ->where('role', 'nurse')
@@ -55,21 +63,16 @@ class NurseController extends Controller
             if ($nurseCount >= 6) {
                 return response()->json(['message' => "Vous ne pouvez avoir que jusqu'à six infirmières."], 400);
             }
-
-            // Attempt to create a new patient based on the validated request data
             $data = new NurseResource(User::create($attributes));
-
-            // If the patient is successfully created, return a success response
             return response()->json([
                 'message' => 'Nurse created successfully',
                 'data' => $data
-            ], 201); // 201 Created status code for successful resource creation
+            ], 201);
         } catch (\Exception $e) {
-            // If there's an error while creating the Nurse, return an error response
             return response()->json([
                 'message' => 'Failed to create Nurse',
                 'error' => $e->getMessage(),
-            ], 500); // 500 Internal Server Error status code for server-side errors
+            ], 500);
         }
     }
 

@@ -9,6 +9,7 @@ use App\Http\Resources\V1\PayementResource;
 use App\Models\Operation;
 use App\Models\OperationDetail;
 use App\Models\Payement;
+use Faker\Provider\ar_EG\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -25,7 +26,9 @@ class OperationController extends Controller
     {
         $user = Auth::user();
         $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+
         $operations = Operation::where('doctor_id', $doctorId)->with('payments', 'operationdetails')->orderBy('id', 'desc')->get();
+
         return new OperationCollection($operations);
     }
 
@@ -124,6 +127,7 @@ class OperationController extends Controller
 
             return response()->json([
                 'message' => 'operation created successfully',
+                'operation_id' => $operation->id
 
             ], 201);
         } catch (\Exception $e) {
@@ -220,10 +224,24 @@ class OperationController extends Controller
     {
         $user = Auth::user();
         $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+        // Retrieve operation ID for the payment
+        $operationId = Payement::where('id', $id)->value('operation_id');
+        // Delete the payment by getting the operation first 
         Payement::whereHas('operation', function ($query) use ($doctorId) {
             $query->where('doctor_id', $doctorId);
         })->findOrFail($id)->delete();
-
+        // Calculate total paid amount and total price
+        $sumAmountPaid = (float) Payement::where('operation_id', $operationId)->sum('amount_paid');
+        $totalPrice = (float) Operation::where('id', $operationId)->where('doctor_id', $doctorId)->value('total_cost');
+        // Update operation status based on payment status
+        Operation::where('id', $operationId)->update(['is_paid' => ($sumAmountPaid === $totalPrice) ? 1 : 0]);
         return response()->json(['message' => 'Payment deleted successfully'], 204);
+    }
+    public function PayementVerificationCheckout($id)
+    {
+        $user = Auth::user();
+        $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+        $operation = Operation::where('doctor_id', $doctorId)->where('id', $id)->pluck('is_paid');
+        return response()->json(['data' => $operation]);
     }
 }

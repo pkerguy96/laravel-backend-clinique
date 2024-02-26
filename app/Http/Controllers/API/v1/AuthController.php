@@ -26,6 +26,13 @@ class AuthController extends Controller
                 return response()->json(['message' => "Les informations d'identification ne correspondent pas"], 401);
             }
             $user = User::where('email', $request->email)->first();
+            if ($user->role === 'nurse') {
+                $terminationDate = $user->termination_date;
+                if ($terminationDate && now() > $terminationDate) {
+
+                    return response()->json(['message' => "votre accès a été résilié. contacter l'administrateur pour plus d'informations"], 401);
+                }
+            }
             if ($user->tokens()->where('tokenable_id', $user->id)->exists()) {
                 $user->tokens()->delete();
             }

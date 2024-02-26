@@ -20,9 +20,12 @@ class StoreNurseRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
      */
+
     public function rules(): array
     {
         return [
+            'recruitment_date' => 'required|date',
+            'termination_date' => 'nullable|date',
             'nom' => ['required'],
             'prenom' => ['required'],
             'cin' => ['required'],
