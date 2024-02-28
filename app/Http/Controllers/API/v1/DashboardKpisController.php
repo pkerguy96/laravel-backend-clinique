@@ -86,13 +86,13 @@ class DashboardKpisController extends Controller
                     Carbon::now()->startOfWeek(Carbon::MONDAY),
                     Carbon::now()->endOfWeek(Carbon::SUNDAY),
                     [
-                        __('Lundi') => 0,
-                        __('Mardi') => 0,
-                        __('Mercredi') => 0,
-                        __('Jeudi') => 0,
-                        __('Vendredi') => 0,
-                        __('Samedi') => 0,
-                        __('Dimanche') => 0,
+                        __('Monday') => 0,
+                        __('Tuesday') => 0,
+                        __('Wednesday') => 0,
+                        __('Thursday') => 0,
+                        __('Friday') => 0,
+                        __('Saturday') => 0,
+                        __('Sunday') => 0,
                     ]
                 ];
             case "month":
@@ -117,18 +117,18 @@ class DashboardKpisController extends Controller
                     Carbon::now()->startOfYear(),
                     Carbon::now()->endOfYear(),
                     [
-                        __('Janvier') => 0,
-                        __('Février') => 0,
-                        __('Mars') => 0,
-                        __('Avril') => 0,
-                        __('Mai') => 0,
-                        __('Juin') => 0,
-                        __('Juillet') => 0,
-                        __('Août') => 0,
-                        __('Septembre') => 0,
-                        __('Octobre') => 0,
-                        __('Novembre') => 0,
-                        __('Décembre') => 0,
+                        __('January') => 0,
+                        __('February') => 0,
+                        __('March') => 0,
+                        __('April') => 0,
+                        __('May') => 0,
+                        __('June') => 0,
+                        __('July') => 0,
+                        __('August') => 0,
+                        __('September') => 0,
+                        __('October') => 0,
+                        __('November') => 0,
+                        __('December') => 0,
                     ]
                 ];
         }
@@ -247,11 +247,66 @@ class DashboardKpisController extends Controller
                 $oldColumns[$key] = $item;
             });
 
+
+
+
         return response()->json([
             'data' => [$oldColumns, $currentColumns],
         ]);
     }
+    public function OnlyCashierNumber()
+    {
+        $user = Auth::user();
 
+        $userPreference = UserPreference::where('doctor_id', $user->id)->pluck('kpi_date')->first();
+
+        $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
+        [$start, $end, $columns] = $this->getDates($userPreference);
+
+        // Retrieve payments between the specified dates
+        $totalPayment = Payement::with('operation')->whereBetween('created_at', [$start, $end])->get()->filter(function ($query) use ($id) {
+            return $query->operation->doctor_id == $id;
+        })->sum('amount_paid');
+
+        return response()->json([
+            'data' => $totalPayment,
+        ]);
+    }
+
+
+
+
+    public function retrieveFromCashier()
+    {
+        $user = Auth::user();
+        log::info($user);
+        $userPreference = UserPreference::where('doctor_id', $user->id)->pluck('kpi_date')->first();
+
+        $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
+        [$start, $end, $columns] = $this->getDates($userPreference);
+        /* 
+        $payements = Payement::whereHas('operation', function ($query) use ($id, $start, $end) {
+            $query->where('doctor_id', $id)->whereBetween('created_at', [$start, $end]);
+        })
+            ->get(); */
+        $totalPayment = Payement::with('operation')->whereBetween('created_at', [$start, $end])->get()->filter(function ($query) use ($id) {
+            return $query->operation->doctor_id == $id;
+        });
+        $totalPayment
+            ->groupBy(function ($carry) use ($userPreference) {
+                return $this->groupKey($carry, $userPreference);
+            })
+            ->map(function ($group) {
+                return $group->sum('amount_paid');
+            })
+            ->each(function ($item, $key) use (&$columns) {
+                $columns[$key] = $item;
+            });
+
+        return response()->json([
+            'data' => $columns,
+        ]);
+    }
 
     public function calculateAgePercentage()
     {

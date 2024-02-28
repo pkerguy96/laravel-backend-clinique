@@ -51,6 +51,8 @@ route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1', 'm
     Route::get('appointmentKpipeak', [DashboardKpisController::class, 'appointmentKpipeak']);
     Route::get('getMonthlyAppointments', [DashboardKpisController::class, 'getMonthlyAppointments']);
     Route::get('getMonthlyCanceledAppointments', [DashboardKpisController::class, 'getMonthlyCanceledAppointments']);
+    Route::get('retrieveFromCashier', [DashboardKpisController::class, 'retrieveFromCashier']);
+    Route::get('OnlyCashierNumber', [DashboardKpisController::class, 'OnlyCashierNumber']);
     route::post('DashboardKpiUserPref', [UserPreferenceController::class, 'DashboardKpiUserPref']);
     Route::delete('deletePaymentDetail/{id}', [OperationController::class, 'deletePaymentDetail']);
     Route::get('PayementVerificationCheckout/{id}', [OperationController::class, 'PayementVerificationCheckout']);
