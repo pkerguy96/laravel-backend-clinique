@@ -53,6 +53,7 @@ route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1', 'm
     Route::get('getMonthlyCanceledAppointments', [DashboardKpisController::class, 'getMonthlyCanceledAppointments']);
     Route::get('retrieveFromCashier', [DashboardKpisController::class, 'retrieveFromCashier']);
     Route::get('OnlyCashierNumber', [DashboardKpisController::class, 'OnlyCashierNumber']);
+    Route::post('PatientsDebt', [DashboardKpisController::class, 'PatientsDebt']);
     route::post('DashboardKpiUserPref', [UserPreferenceController::class, 'DashboardKpiUserPref']);
     Route::delete('deletePaymentDetail/{id}', [OperationController::class, 'deletePaymentDetail']);
     Route::get('PayementVerificationCheckout/{id}', [OperationController::class, 'PayementVerificationCheckout']);

@@ -154,7 +154,7 @@ class OrdonanceController extends Controller
         } catch (\Exception $e) {
             // Rollback the transaction in case of an error
             DB::rollBack();
-
+            Log::info($e);
             // Return an error response
             return response()->json(['message' => 'Error updating Ordonance'], 500);
         }

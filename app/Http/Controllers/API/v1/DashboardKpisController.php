@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\AppointmentKpi;
+use App\Http\Resources\V1\SearchOperationDebtResource;
 use App\Models\Appointment;
 use App\Models\Operation;
 use App\Models\Patient;
@@ -353,5 +354,14 @@ class DashboardKpisController extends Controller
         return response()->json([
             'data' => AppointmentKpi::collection($appointments),
         ]);
+    }
+    public function PatientsDebt(Request $request)
+    {
+        $user = Auth::user();
+        $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
+
+        $Operations = Operation::with('patient', 'operationdetails', 'payments')->where('doctor_id', $id)->whereBetween('created_at', [Carbon::parse($request->date)->startOfDay(),  Carbon::parse($request->date2)->endOfDay()])->get();
+        return   SearchOperationDebtResource::collection($Operations);
+        /* return response()->json(['data' => $Operations]); */
     }
 }
