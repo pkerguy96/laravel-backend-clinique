@@ -357,10 +357,11 @@ class DashboardKpisController extends Controller
     }
     public function PatientsDebt(Request $request)
     {
+        Log::info($request);
         $user = Auth::user();
         $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
 
-        $Operations = Operation::with('patient', 'operationdetails', 'payments')->where('doctor_id', $id)->whereBetween('created_at', [Carbon::parse($request->date)->startOfDay(),  Carbon::parse($request->date2)->endOfDay()])->get();
+        $Operations = Operation::with('patient', 'operationdetails', 'payments')->where('doctor_id', $id)->where('is_paid', 0)->whereBetween('created_at', [Carbon::parse($request->date)->startOfDay(),  Carbon::parse($request->date2)->endOfDay()])->get();
         return   SearchOperationDebtResource::collection($Operations);
         /* return response()->json(['data' => $Operations]); */
     }
