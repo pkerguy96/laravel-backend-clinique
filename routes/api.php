@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
+route::post('OperationUserPref', [UserPreferenceController::class, 'OperationUserPref']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -55,6 +55,7 @@ route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1', 'm
     Route::get('OnlyCashierNumber', [DashboardKpisController::class, 'OnlyCashierNumber']);
     Route::post('PatientsDebt', [DashboardKpisController::class, 'PatientsDebt']);
     route::post('DashboardKpiUserPref', [UserPreferenceController::class, 'DashboardKpiUserPref']);
+  
     Route::delete('deletePaymentDetail/{id}', [OperationController::class, 'deletePaymentDetail']);
     Route::get('PayementVerificationCheckout/{id}', [OperationController::class, 'PayementVerificationCheckout']);
 

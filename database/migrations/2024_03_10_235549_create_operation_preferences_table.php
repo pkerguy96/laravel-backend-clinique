@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('operation_preferences', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('doctor_id');
             $table->string('name');
             $table->string('code')->nullable();
             $table->decimal('price', 10, 2);
             $table->timestamps();
+            $table->foreign('doctor_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

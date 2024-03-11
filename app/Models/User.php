@@ -49,6 +49,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Ordonance::class, 'doctor_id');
     }
+    public function  OperationPref()
+    {
+        return $this->hasMany(OperationPreference::class, 'doctor_id');
+    }
     public function payments()
     {
         return $this->hasManyThrough(
