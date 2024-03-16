@@ -55,7 +55,7 @@ class OperationController extends Controller
                 'patient_id' => 'required|integer|exists:patients,id',
                 'amount_paid' => 'nullable|numeric',
                 'operations' => 'required|array',
-                'operations.*.operation_type' => 'required|numeric',
+
                 'operations.*.price' => 'required|numeric|between:0,9999999.99',
                 'operations.*.amount_paid' => 'nullable|numeric|between:0,9999999.99',
                 'operations.*.tooth_id' => 'required|array',
@@ -76,7 +76,7 @@ class OperationController extends Controller
                 'operations.array' => 'Le champ "operations" doit être un tableau.',
 
                 'operations.*.operation_type.required' => 'Le champ "operation_type" est requis.',
-                'operations.*.operation_type.numeric' => 'Le champ "operation_type" doit être un nombre.',
+
 
                 'operations.*.price.required' => 'Le champ "price" est requis.',
                 'operations.*.price.numeric' => 'Le champ "price" doit être un nombre.',

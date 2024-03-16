@@ -20,10 +20,11 @@ class UserPreferenceController extends Controller
             return $this->error(null, 'Veuillez sélectionner une période', 501);
         }
         $user = Auth::user();
+        $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
         if (!$user) {
             return $this->error(null, 'Aucun utilisateur trouvé', 501);
         }
-        UserPreference::where('doctor_id', $user->id)->update([
+        UserPreference::where('doctor_id', $doctorId)->update([
             'kpi_date' => $request->input('period'),
         ]);
         return $this->success('success', 'La préférence a été modifiée', 200);
@@ -33,9 +34,9 @@ class UserPreferenceController extends Controller
 
         try {
             $user = Auth::user();
+            $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
             $data = $request->all();
-            $data['doctor_id'] = $user->id;
-
+            $data['doctor_id'] = $doctorId;
             $operation =  new OperationPreferenceResource(OperationPreference::create($data));
 
             return $this->success($operation, 'Insertion réussie', 200);
@@ -46,8 +47,33 @@ class UserPreferenceController extends Controller
     }
     public function getOperationPrefs()
     {
-        $doctor_id = Auth()->id();
-        $operations = OperationPreference::where('doctor_id', $doctor_id)->get();
+
+        $user = Auth::user();
+        $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+        $operations = OperationPreference::where('doctor_id', $doctorId)->get();
         return  OperationPreferenceResource::collection($operations);
+    }
+    public function deleteOperationPrefs($id)
+    {
+        $user = Auth::user();
+
+        // Ensure user is authenticated
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        // Ensure the user is authorized to delete this operation preference
+        $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+        $operationPreference = OperationPreference::where('doctor_id', $doctorId)->where('id', $id)->first();
+
+        if (!$operationPreference) {
+            return response()->json(['error' => 'Operation preference not found'], 404);
+        }
+
+        // Delete the operation preference
+        $operationPreference->delete();
+
+        // Respond with a success message
+        return response()->json(['message' => 'Operation preference deleted successfully'], 200);
     }
 }

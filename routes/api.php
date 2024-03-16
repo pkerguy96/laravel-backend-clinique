@@ -57,6 +57,7 @@ route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1', 'm
     route::post('DashboardKpiUserPref', [UserPreferenceController::class, 'DashboardKpiUserPref']);
     route::post('OperationUserPref', [UserPreferenceController::class, 'OperationUserPref']);
     route::get('getOperationPrefs', [UserPreferenceController::class, 'getOperationPrefs']);
+    route::delete('deleteOperationPrefs/{id}', [UserPreferenceController::class, 'deleteOperationPrefs']);
     Route::delete('deletePaymentDetail/{id}', [OperationController::class, 'deletePaymentDetail']);
     Route::get('PayementVerificationCheckout/{id}', [OperationController::class, 'PayementVerificationCheckout']);
 
