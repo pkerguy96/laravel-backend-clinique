@@ -22,13 +22,18 @@ class RolesController extends Controller
         try {
             app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
             /*  $user = Auth::user(); */
+            $currentGuard = Auth::getDefaultDriver();
+
+            dd($currentGuard);
+            /* $user = Auth::guard('api')->user();
+            dd($user); */
             $user = User::where('id', Auth::user()->id)->first();
             /*    $teamId = session('team_id');
 
             dd($teamId); */
             $role = Role::where('name', 'sexer')->where('guard_name', 'api')->first();
 
-            $user->assignRole($role, 28, 1);
+            $user->assignRole('sexer');
 
             /*             $role = Role::findByName('sexer', 'web'); */
             /* $role = Role::create(['name' => 'haway', 'guard_name' => 'web', 'team_id' => 1]); */

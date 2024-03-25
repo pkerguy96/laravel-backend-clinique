@@ -18,12 +18,12 @@ class TeamsPermission
     public function handle(Request $request, Closure $next): Response
     {
 
-        if (!empty(auth()->user())) {
+        /*   if (!empty(auth()->user())) {
             $teamId = Session::get('team_id');
             if ($teamId !== null && Auth::user()->role === 'doctor') {
                 setPermissionsTeamId(session(Auth::user()->id));
             }
-        }
+        } */
         return $next($request);
     }
 }

@@ -25,6 +25,7 @@ class AuthController extends Controller
             if (!Auth::attempt($credentials)) {
                 return response()->json(['message' => "Les informations d'identification ne correspondent pas"], 401);
             }
+
             $user = User::where('email', $request->email)->first();
             if ($user->role === 'nurse') {
                 $terminationDate = $user->termination_date;
@@ -43,6 +44,7 @@ class AuthController extends Controller
             if ($user->profile_picture) {
                 $url = asset("storage/profile_pictures/"  . $user->profile_picture);
             }
+
             return $this->success([
                 'user' => $user,
                 'token' => $token,
