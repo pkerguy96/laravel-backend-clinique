@@ -27,6 +27,7 @@ class AuthController extends Controller
             }
 
             $user = User::where('email', $request->email)->first();
+            session(['team_id'=> $user->id]);
             if ($user->role === 'nurse') {
                 $terminationDate = $user->termination_date;
                 if ($terminationDate && now() > $terminationDate) {
@@ -49,6 +50,8 @@ class AuthController extends Controller
                 'user' => $user,
                 'token' => $token,
                 'profile' => $url,
+                'dd'=> session('team_id')
+               
             ]);
         } catch (\Throwable $th) {
             Log::error($th);

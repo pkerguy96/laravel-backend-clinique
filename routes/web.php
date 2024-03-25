@@ -8,7 +8,7 @@ use App\Http\Controllers\API\v1\fileuploadController;
 use App\Http\Controllers\API\v1\PasswordResetController;
 use Laravel\Sanctum\HasApiTokens;
 use App\Http\Middleware\VerifyCsrfToken;
-
+use App\Http\Controllers\API\v1\RolesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,7 +29,6 @@ Route::get('/', function () {
 Route::get('/file-upload/{id}', [fileuploadController::class, 'show']);
 Route::post('/api/v1/resetlink', [PasswordResetController::class, 'sendResetLinkEmail'])->withoutMiddleware(VerifyCsrfToken::class);
 Route::post('/api/v1/reset', [PasswordResetController::class, 'resetPassword'])->withoutMiddleware(VerifyCsrfToken::class);
-
 
 Route::get('/setup', function () {
     $credentials = [
