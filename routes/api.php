@@ -9,6 +9,7 @@ use App\Http\Controllers\API\v1\NurseController;
 use App\Http\Controllers\API\v1\OperationController;
 use App\Http\Controllers\API\v1\OrdonanceController;
 use App\Http\Controllers\API\v1\PatientController;
+use App\Http\Controllers\API\v1\RolesController;
 use App\Http\Controllers\API\v1\StockController;
 use App\Http\Controllers\API\v1\UserPreferenceController;
 use Illuminate\Http\Request;
@@ -61,7 +62,10 @@ route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1', 'm
     Route::delete('deletePaymentDetail/{id}', [OperationController::class, 'deletePaymentDetail']);
     Route::get('PayementVerificationCheckout/{id}', [OperationController::class, 'PayementVerificationCheckout']);
 
+    /* ROLES */
+    route::post('grantAccess', [RolesController::class, 'grantAccess']);
 
+    /* ROLES */
 
 
 
