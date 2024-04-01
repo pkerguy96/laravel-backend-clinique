@@ -6,12 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\StoreNurseRequest;
 use App\Http\Resources\V1\NurseCollection;
 use App\Http\Resources\V1\NurseResource;
-
+use App\Http\Resources\V1\NurseRoleResource;
 use App\Models\User;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
+
 
 class NurseController extends Controller
 {
@@ -75,7 +75,18 @@ class NurseController extends Controller
             ], 500);
         }
     }
+    public function RolesNursesList()
+    {
+        $authenticatedUserId = auth()->user();
+        if ($authenticatedUserId->role === 'nurse') {
+            return $this->error(null, 'Only doctors are allowed access!', 401);
+        }
 
+        $nurses = User::where('doctor_id', $authenticatedUserId->id)->get();
+
+        $data =  NurseRoleResource::collection($nurses);
+        return $this->success($data, 'success', 200);
+    }
     /**
      * Display the specified resource.
      */

@@ -63,8 +63,10 @@ route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1', 'm
     Route::get('PayementVerificationCheckout/{id}', [OperationController::class, 'PayementVerificationCheckout']);
 
     /* ROLES */
-    
-route::get('grantAccess', [RolesController::class, 'grantAccess']);
+
+    route::post('grantAccess', [RolesController::class, 'grantAccess']);
+    route::get('RolesNursesList', [NurseController::class, 'RolesNursesList']);
+    route::get('getRoles', [RolesController::class, 'getRoles']);
 
     /* ROLES */
 
