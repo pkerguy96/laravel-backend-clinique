@@ -67,6 +67,9 @@ route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1', 'm
     route::post('grantAccess', [RolesController::class, 'grantAccess']);
     route::get('RolesNursesList', [NurseController::class, 'RolesNursesList']);
     route::get('getRoles', [RolesController::class, 'getRoles']);
+    route::post('userPermissions', [RolesController::class, 'userPermissions']);
+    route::post('createRole', [RolesController::class, 'createRole']);
+    route::get('getUsersViaRoles', [RolesController::class, 'getUsersViaRoles']);
 
     /* ROLES */
 

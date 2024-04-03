@@ -38,9 +38,9 @@ class AuthController extends Controller
             if ($user->tokens()->where('tokenable_id', $user->id)->exists()) {
                 $user->tokens()->delete();
             }
-            $expiresAt = now()->addMinutes(1440); // Set the expiration time to 24 hours from now
 
-            $token = $user->createToken('Api token of ' . $user->name, ['expires_at' => $expiresAt])->plainTextToken;
+
+            $token = $user->createToken('Api token of ' . $user->nom)->plainTextToken;
             $url = null;
             if ($user->profile_picture) {
                 $url = asset("storage/profile_pictures/"  . $user->profile_picture);
