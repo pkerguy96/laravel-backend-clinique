@@ -116,7 +116,13 @@ class RolesController extends Controller
                 return $this->error(null, 'Seuls les médecins sont autorisés à accéder.', 501);
             }
             setPermissionsTeamId($user);
+            //TODO: potential bug
+
+
             $role = Role::findByName($request->rolename);
+            return $this->success($role, 'sss', 200);
+
+
             if (!$role) {
                 throw RoleDoesNotExist::named($request->rolename, 'sanctum');
             }
@@ -125,6 +131,22 @@ class RolesController extends Controller
         } catch (RoleDoesNotExist $exception) {
 
             return $this->error(null, $exception->getMessage(), 500);
+        } catch (\Throwable $th) {
+            return $this->error(null, $th->getMessage(), 500);
+        }
+    }
+    public function deleteRole($id)
+    {
+        try {
+            $user = auth()->user();
+            if ($user->role === 'nurse') {
+                return $this->error(null, 'Seuls les médecins sont autorisés à accéder.', 501);
+            }
+            setPermissionsTeamId($user);
+            $role = Role::where('id', $id)->where('team_id', $user->id)->first();
+
+            $role->delete();
+            return $this->success(null, 'deleted success', 201);
         } catch (\Throwable $th) {
             return $this->error(null, $th->getMessage(), 500);
         }
