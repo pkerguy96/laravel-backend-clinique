@@ -22,9 +22,13 @@ class RolesController extends Controller
     {
         try {
             $user = Auth::user();
+
+            setPermissionsTeamId($user);
+
             if ($user->role === 'nurse') {
                 return $this->error(null, 'Seuls les médecins sont autorisés à accéder.', 401);
             }
+
             $roles = Role::where('team_id', $user->id)->with('users')->latest('created_at')->get();
             return new RoleCollection($roles);
         } catch (\Throwable $th) {
@@ -55,6 +59,7 @@ class RolesController extends Controller
             $this->error($th->getMessage(), 'error', 501);
         }
     }
+
     public function getRoles()
     {
         try {
@@ -120,7 +125,6 @@ class RolesController extends Controller
 
 
             $role = Role::findByName($request->rolename);
-            return $this->success($role, 'sss', 200);
 
 
             if (!$role) {

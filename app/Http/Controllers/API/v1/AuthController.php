@@ -47,20 +47,21 @@ class AuthController extends Controller
             }
             /* start role*/
             setPermissionsTeamId($user);
-
-            $permissionsviarole = $user->getPermissionsViaRoles()->toArray();
-            $permissionNames = array_map(function ($permission) {
-                return $permission['name'];
-            }, $permissionsviarole);
-
-
+            $permissionNames = [];
+            if ($user->hasRole('Super-Admin')) {
+                $permissionNames[] = 'Super-Admin';
+            } else {
+                $permissionsviarole = $user->getPermissionsViaRoles()->toArray();
+                $permissionNames = array_map(function ($permission) {
+                    return $permission['name'];
+                }, $permissionsviarole);
+            }
             /* end role*/
             //TODO SEND ONLY USER DATA
             return $this->success([
                 'user' => $user,
                 'token' => $token,
                 'profile' => $url,
-
                 'roles' => $permissionNames
 
             ]);

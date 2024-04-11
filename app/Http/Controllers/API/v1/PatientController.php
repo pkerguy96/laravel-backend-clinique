@@ -9,10 +9,15 @@ use App\Http\Requests\V1\StorePatientRequest;
 use App\Http\Resources\V1\PatientResource;
 use App\Http\Resources\V1\PatientCollection;
 use App\Http\Resources\V1\PatientDetailResource;
+use App\Traits\PermissionCheck;
+use App\Traits\PermissionCheckTrait;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
 
 class PatientController extends Controller
 {
+
+    use PermissionCheckTrait;
     /**
      * Display a listing of the resource.
      */
@@ -20,8 +25,11 @@ class PatientController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $permissionResult = $this->checkPermission('access_patient');
+        if ($permissionResult instanceof JsonResponse) {
+            return $permissionResult;
+        }
         $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
-
         return new PatientCollection(Patient::with('appointments', 'Ordonance')->where('doctor_id', $id)->orderBy('id', 'desc')->get());
     }
 
@@ -38,8 +46,14 @@ class PatientController extends Controller
      */
     public function store(StorePatientRequest $request)
     {
+
         try {
+
             $user = Auth::user();
+            $permissionResult = $this->checkPermission('insert_patient');
+            if ($permissionResult instanceof JsonResponse) {
+                return $permissionResult;
+            }
             $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
 
             $requestData = $request->all();
@@ -68,6 +82,10 @@ class PatientController extends Controller
     {
 
         $user = Auth::user();
+        $permissionResult = $this->checkPermission('access_patient');
+        if ($permissionResult instanceof JsonResponse) {
+            return $permissionResult;
+        }
         $doctor_id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
         return  new PatientResource(Patient::where('id', $id)->where('doctor_id', $doctor_id)->first());
     }
@@ -75,6 +93,10 @@ class PatientController extends Controller
     {
 
         $user = Auth::user();
+        $permissionResult = $this->checkPermission('access_patient');
+        if ($permissionResult instanceof JsonResponse) {
+            return $permissionResult;
+        }
         $doctor_id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
         return  new PatientDetailResource(Patient::with('appointments', 'operations')->where('id', $id)->where('doctor_id', $doctor_id)->first());
     }
@@ -92,6 +114,10 @@ class PatientController extends Controller
     public function update(StorePatientRequest $request, string $id)
     {
         $user = Auth::user();
+        $permissionResult = $this->checkPermission('update_patient');
+        if ($permissionResult instanceof JsonResponse) {
+            return $permissionResult;
+        }
         $doctor_id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
         $patient = Patient::where('doctor_id', $doctor_id)->findOrFail($id);
 
@@ -119,6 +145,10 @@ class PatientController extends Controller
     public function destroy(string $id)
     {
         $user = Auth::user();
+        $permissionResult = $this->checkPermission('delete_patient');
+        if ($permissionResult instanceof JsonResponse) {
+            return $permissionResult;
+        }
         $doctor_id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
         Patient::where('doctor_id', $doctor_id)->findorfail($id)->delete();
         return response()->json(['message' => 'patient deleted successfully'], 204);

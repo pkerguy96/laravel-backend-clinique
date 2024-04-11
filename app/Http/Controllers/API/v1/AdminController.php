@@ -32,7 +32,6 @@ class AdminController extends Controller
 
             return response()->json(['message' => 'Profile picture uploaded successfully']);
         }
-
         return response()->json(['message' => 'Failed to upload profile picture'], 400);
     }
 

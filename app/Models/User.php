@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Traits\HasRoles;
+use Spatie\Permission\Models\Role;
 
 class User extends Authenticatable
 {
@@ -80,13 +82,19 @@ class User extends Authenticatable
     {
         parent::boot();
 
-        // Listen for the creating event to assign roles
+
         static::created(function ($user) {
             // Create a new user preference row when a user is created
             UserPreference::create([
                 'doctor_id' => $user->id,
                 'kpi_date' => 'year',
             ]);
+            if ($user->role === 'doctor') {
+                $superAdminRole =   Role::create(['name' => 'Super-Admin', 'guard_name' => 'sanctum', 'team_id' => $user->id]);
+                $permissions = Permission::pluck('id')->toArray();
+
+                $superAdminRole->permissions()->sync($permissions);
+            }
         });
     }
 }

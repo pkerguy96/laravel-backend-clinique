@@ -19,7 +19,6 @@ class AppointmentController extends Controller
     {
         $user = Auth::user();
         $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
-
         return new AppointmentCollection(
             Appointment::where('doctor_id', $doctorId)
                 ->orderBy('id', 'desc')

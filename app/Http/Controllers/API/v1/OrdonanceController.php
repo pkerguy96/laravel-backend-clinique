@@ -10,14 +10,16 @@ use App\Http\Resources\V1\OrdonanceResource;
 use App\Models\Ordonance as ModelsOrdonance;
 use App\Models\OrdonanceDetails;
 use App\Traits\HttpResponses;
+use App\Traits\PermissionCheckTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use PhpParser\Node\Stmt\TryCatch;
+use Illuminate\Http\JsonResponse;
 
 class OrdonanceController extends Controller
 {
+    use PermissionCheckTrait;
     use HttpResponses;
     /**
      * Display a listing of the resource.
@@ -25,6 +27,10 @@ class OrdonanceController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $permissionResult = $this->checkPermission('access_ordonance');
+        if ($permissionResult instanceof JsonResponse) {
+            return $permissionResult;
+        }
         $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
         $ordonances = ModelsOrdonance::with('OrdonanceDetails', 'Patient')->where('doctor_id', $doctorId)->orderBy('id', 'desc')->get();
 
@@ -45,14 +51,18 @@ class OrdonanceController extends Controller
     public function store(Request $request)
     {
         try {
-
+            $user = Auth::user();
+            $permissionResult = $this->checkPermission('insert_ordonance');
+            if ($permissionResult instanceof JsonResponse) {
+                return $permissionResult;
+            }
+            $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
             $medicineArray = $request->medicine;
 
             // Start a database transaction
             DB::beginTransaction();
 
-            $user = Auth::user();
-            $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+
             // Create the Ordonance record
             $ordonance = ModelsOrdonance::create([
                 'doctor_id' => $doctorId,
@@ -84,7 +94,6 @@ class OrdonanceController extends Controller
             // Return an error response
             return response()->json([
                 'message' => 'Error creating Ordonance',
-
             ], 500);
         }
     }
@@ -95,6 +104,10 @@ class OrdonanceController extends Controller
     public function show(string $id)
     {
         $user = Auth::user();
+        $permissionResult = $this->checkPermission('access_ordonance');
+        if ($permissionResult instanceof JsonResponse) {
+            return $permissionResult;
+        }
         $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
         $data = ModelsOrdonance::with('OrdonanceDetails', 'Patient')->where('doctor_id', $doctorId)->where('id', $id)->first();
         return response()->json(['data' => $data], 200);
@@ -113,13 +126,15 @@ class OrdonanceController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        Log::error($request->all());
-        try {
-            // Find the Ordonance record by ID
-            $ordonance = ModelsOrdonance::findOrFail($id);
 
+        try {
             $user = Auth::user();
             $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+            $permissionResult = $this->checkPermission('update_ordonance');
+            if ($permissionResult instanceof JsonResponse) {
+                return $permissionResult;
+            }
+            $ordonance = ModelsOrdonance::findOrFail($id);
             // Start a database transaction
             DB::beginTransaction();
 
@@ -166,6 +181,10 @@ class OrdonanceController extends Controller
     public function destroy(string $id)
     {
         try {
+            $permissionResult = $this->checkPermission('delete_ordonance');
+            if ($permissionResult instanceof JsonResponse) {
+                return $permissionResult;
+            }
             $ordonance = ModelsOrdonance::findorfail($id);
 
             if ($ordonance) {
