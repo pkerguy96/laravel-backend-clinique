@@ -9,26 +9,30 @@ use App\Http\Resources\V1\PayementResource;
 use App\Models\Operation;
 use App\Models\OperationDetail;
 use App\Models\Payement;
+use App\Traits\PermissionCheckTrait;
 use Faker\Provider\ar_EG\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
 class OperationController extends Controller
 {
+    use PermissionCheckTrait;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $user = Auth::user();
+        $permissionResult = $this->checkPermission('access_debt');
+        if ($permissionResult instanceof JsonResponse) {
+            return $permissionResult;
+        }
         $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
-
         $operations = Operation::where('doctor_id', $doctorId)->with('payments', 'operationdetails')->orderBy('id', 'desc')->get();
-
         return new OperationCollection($operations);
     }
 
@@ -46,9 +50,16 @@ class OperationController extends Controller
     public function store(Request $request)
     {
 
-        $data = $request->all();
+
         //TODO: refactor this
         try {
+            $user = Auth::user();
+            $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+            $permissionResult = $this->checkPermission('insert_debt');
+            if ($permissionResult instanceof JsonResponse) {
+                return $permissionResult;
+            }
+            $data = $request->all();
             $validator = validator($request->all(), [
                 'is_paid' => 'required|boolean',
                 'note' => 'nullable|string',
@@ -92,8 +103,7 @@ class OperationController extends Controller
                 throw new ValidationException($validator);
             }
 
-            $user = Auth::user();
-            $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+
             $data = $request->json()->all();
             $calculator = 0;
             foreach ($data['operations'] as $item) {
@@ -162,8 +172,12 @@ class OperationController extends Controller
     public function update(Request $request, string $id)
     {
         try {
-
+            $permissionResult = $this->checkPermission('insert_debt');
+            if ($permissionResult instanceof JsonResponse) {
+                return $permissionResult;
+            }
             $operation = Operation::findorfail($id);
+
             if ($operation) {
                 $sumAmountPaid = (float)Payement::where('operation_id', $id)->sum('amount_paid');
                 $totalCost = (float)$operation->total_cost;
@@ -223,6 +237,10 @@ class OperationController extends Controller
     public function deletePaymentDetail($id)
     {
         $user = Auth::user();
+        $permissionResult = $this->checkPermission('delete_debt');
+        if ($permissionResult instanceof JsonResponse) {
+            return $permissionResult;
+        }
         $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
         // Retrieve operation ID for the payment
         $operationId = Payement::where('id', $id)->value('operation_id');

@@ -12,6 +12,7 @@ use App\Http\Controllers\API\v1\PatientController;
 use App\Http\Controllers\API\v1\RolesController;
 use App\Http\Controllers\API\v1\StockController;
 use App\Http\Controllers\API\v1\UserPreferenceController;
+use App\Http\Controllers\API\v1\WaitingRoomController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 // Add this function to handle OPTIONS requests for CORS
@@ -75,7 +76,13 @@ route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1', 'm
     /* ROLES */
 
 
+    /* waiting room */
+    route::apiResource('Waitingroom', WaitingRoomController::class);
+    route::get('incrementPatient', [WaitingRoomController::class, 'addPatient']);
+    route::get('decrementPatient', [WaitingRoomController::class, 'removePatient']);
+    route::get('resetPatientCounter', [WaitingRoomController::class, 'resetPatientCounter']);
 
+    /* waiting room */
 
     route::apiResource('Patient', PatientController::class);
     Route::apiResource('Nurse', NurseController::class);

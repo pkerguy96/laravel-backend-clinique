@@ -9,17 +9,22 @@ use App\Models\Appointment;
 use App\Models\Operation;
 use App\Models\Patient;
 use App\Models\Payement;
-use App\Models\User;
+
 use App\Models\UserPreference;
 use App\Traits\HttpResponses;
+use App\Traits\PermissionCheckTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\JsonResponse;
+
 
 class DashboardKpisController extends Controller
 {
     use HttpResponses;
+    use PermissionCheckTrait;
+
     public function getAppointments()
     {
         $user = Auth::user();
@@ -357,8 +362,12 @@ class DashboardKpisController extends Controller
     }
     public function PatientsDebt(Request $request)
     {
-        Log::info($request);
+
         $user = Auth::user();
+        $permissionResult = $this->checkPermission('search_creance');
+        if ($permissionResult instanceof JsonResponse) {
+            return $permissionResult;
+        }
         $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
 
         $Operations = Operation::with('patient', 'operationdetails', 'payments')->where('doctor_id', $id)->where('is_paid', 0)->whereBetween('created_at', [Carbon::parse($request->date)->startOfDay(),  Carbon::parse($request->date2)->endOfDay()])->get();

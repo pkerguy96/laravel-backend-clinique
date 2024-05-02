@@ -10,6 +10,7 @@ use App\Models\file_upload;
 use App\Models\Patient;
 use App\Models\User;
 use App\Traits\HttpResponses;
+use App\Traits\PermissionCheckTrait;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Log;
@@ -17,11 +18,12 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use ZipArchive;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Http\JsonResponse;
 use function Laravel\Prompts\error;
 
 class fileuploadController extends Controller
 {
+    use PermissionCheckTrait;
     use FileUpload;
     use HttpResponses;
     /**
@@ -32,15 +34,16 @@ class fileuploadController extends Controller
         try {
             $user = Auth::user();
             $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
+            $permissionResult = $this->checkPermission('access_document');
+            if ($permissionResult instanceof JsonResponse) {
+                return $permissionResult;
+            }
             $patientClusters = file_upload::where('doctor_id', $id)->select('cluster', 'folder_path')
                 ->groupBy('cluster', 'folder_path')
                 ->get();
             if ($patientClusters->isEmpty()) {
                 return response()->json(['error' => 'No files found for the patient'], 404);
             }
-
-
-
             foreach ($patientClusters as $file) {
                 $cluster = $file->cluster;
                 $url = Storage::disk('public')->url($file->folder_path);
@@ -75,7 +78,10 @@ class fileuploadController extends Controller
             } else {
                 $doctor_id = $authenticatedUserId->id;
             }
-
+            $permissionResult = $this->checkPermission('insert_document');
+            if ($permissionResult instanceof JsonResponse) {
+                return $permissionResult;
+            }
             if ($request->hasFile('files')) {
 
                 $patient  = Patient::findorfail($request->patient_id);
@@ -118,7 +124,7 @@ class fileuploadController extends Controller
      */
     public function show(Request $request, string $id)
     {
-        //TODO: THIS NEEDS TO BE MORE SECURE IN THE FUTURE
+        //TODO: THIS NEEDS TO BE MORE SECURE IN THE FUTURE also permission on this one 
         $retreived_id = $request->query('userId');
         $test = User::findorfail($retreived_id);
         if ($test->role === 'nurse') {
@@ -155,6 +161,7 @@ class fileuploadController extends Controller
         try {
             $user = Auth::user();
             $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
+
             $patientClusters = file_upload::where('doctor_id', $id)->select('cluster', 'folder_path', 'created_at', 'patient_id', 'type', 'original_name')
                 ->groupBy('cluster', 'folder_path', 'created_at', 'patient_id', 'type', 'original_name')
                 ->get();
@@ -238,6 +245,10 @@ class fileuploadController extends Controller
     public function destroy(string $id)
     {
         try {
+            $permissionResult = $this->checkPermission('delete_document');
+            if ($permissionResult instanceof JsonResponse) {
+                return $permissionResult;
+            }
             $files = file_upload::where('cluster', $id)->get();
             if ($files->isEmpty()) {
                 return $this->error(null, 'No cluster found', 404);
