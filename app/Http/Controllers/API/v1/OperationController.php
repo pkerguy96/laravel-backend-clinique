@@ -9,6 +9,7 @@ use App\Http\Resources\V1\PayementResource;
 use App\Models\Operation;
 use App\Models\OperationDetail;
 use App\Models\Payement;
+use App\Traits\HttpResponses;
 use App\Traits\PermissionCheckTrait;
 use Faker\Provider\ar_EG\Payment;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\Log;
 
 class OperationController extends Controller
 {
+    use HttpResponses;
     use PermissionCheckTrait;
     /**
      * Display a listing of the resource.
@@ -161,9 +163,36 @@ class OperationController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function modifyoperation(string $id)
     {
-        //
+
+        try {
+            $user = Auth::user();
+            $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+            $operation =  Operation::where('doctor_id', $doctorId)->where('id', $id)->first();
+            $operation->treatment_nbr++;
+            $operation->save();
+            return $this->success(null, 'yey', 201);
+        } catch (\Throwable $th) {
+            return $this->error($th->getMessage(), 'oops', 501);
+        }
+    }
+    public function treatmentisdone(string $id)
+    {
+
+        try {
+            $user = Auth::user();
+            $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+            $operation =  Operation::where('doctor_id', $doctorId)->where('id', $id)->first();
+            if ($operation->treatment_isdone > 0) {
+                return $this->error(null, 'treatment is already done', 500);
+            }
+            $operation->treatment_isdone++;
+            $operation->save();
+            return $this->success(null, 'yey', 201);
+        } catch (\Throwable $th) {
+            return $this->error($th->getMessage(), 'oops', 501);
+        }
     }
 
     /**

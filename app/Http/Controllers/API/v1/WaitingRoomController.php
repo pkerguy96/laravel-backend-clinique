@@ -36,7 +36,7 @@ class WaitingRoomController extends Controller
             // Increment the number of patients waiting by 1
             WaitingRoom::where('doctor_id', $doctorId)->increment('num_patients_waiting');
 
-            return $this->success('Patient added successfully', 'success', 201);
+            return $this->success('Patient ajouté avec succès', 'success', 201);
         } catch (\Throwable $th) {
             $this->error($th->getMessage(), 'oops', 500);
         }
@@ -49,8 +49,12 @@ class WaitingRoomController extends Controller
             $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
 
             // Decrement the number of patients waiting by 1
+            $counter =  WaitingRoom::where('doctor_id', $doctorId)->pluck('num_patients_waiting')->first();
+            Log::info($counter);
+            if ($counter === 0) {
+                return $this->error(null, 'Aucun patient en attente à retirer', 400);
+            }
             WaitingRoom::where('doctor_id', $doctorId)->decrement('num_patients_waiting');
-
             return $this->success('Patient removed successfully', 'success', 201);
         } catch (\Throwable $th) {
             $this->error($th->getMessage(), 'oops', 500);
@@ -65,7 +69,7 @@ class WaitingRoomController extends Controller
             // Decrement the number of patients waiting by 1
             WaitingRoom::where('doctor_id', $doctorId)->update(['num_patients_waiting' => 0]);
 
-            return $this->success('Patient counter reseted successfully', 'success', 201);
+            return $this->success('Compteur de patients a réinitialisé ', 'success', 201);
         } catch (\Throwable $th) {
             $this->error($th->getMessage(), 'oops', 500);
         }

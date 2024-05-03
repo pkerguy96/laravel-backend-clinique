@@ -44,6 +44,11 @@ route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1', 'm
     Route::get('patientDetails/{id}', [PatientController::class, 'patientDetails']);
     Route::get('getByOperationId/{id}', [OperationController::class, 'getByOperationId']);
     Route::get('uploadsInfo', [fileuploadController::class, 'uploadsInfo']);
+    /* operation update */
+    route::patch('modifyoperationtreatment/{id}', [OperationController::class, 'modifyoperation']);
+    route::patch('finishtreatment/{id}', [OperationController::class, 'treatmentisdone']);
+    /* operation update */
+
     //Kpis
     Route::get('getTotalRevenue', [DashboardKpisController::class, 'getTotalRevenue']);
     Route::get('getAppointments', [DashboardKpisController::class, 'getAppointments']);
@@ -81,6 +86,7 @@ route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1', 'm
     route::get('incrementPatient', [WaitingRoomController::class, 'addPatient']);
     route::get('decrementPatient', [WaitingRoomController::class, 'removePatient']);
     route::get('resetPatientCounter', [WaitingRoomController::class, 'resetPatientCounter']);
+
 
     /* waiting room */
 
