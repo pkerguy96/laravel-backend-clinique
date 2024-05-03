@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\OperationCollection;
 use App\Http\Resources\V1\OperationResource;
 use App\Http\Resources\V1\PayementResource;
+use App\Http\Resources\v1\treatementOperationCollection;
 use App\Models\Operation;
 use App\Models\OperationDetail;
 use App\Models\Payement;
@@ -37,7 +38,20 @@ class OperationController extends Controller
         $operations = Operation::where('doctor_id', $doctorId)->with('payments', 'operationdetails')->orderBy('id', 'desc')->get();
         return new OperationCollection($operations);
     }
+    //TODO : give it permission 
+    public function recurringOperation()
+    {
+        $user = Auth::user();
+        $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
+        $operations = Operation::where('doctor_id', $doctorId)
+            ->where('treatment_nbr', '>', 0)
+            ->where('treatment_isdone', '!=', 1)
+            ->with('operationdetails')
+            ->orderBy('id', 'desc')
+            ->get();
 
+        return new treatementOperationCollection($operations);
+    }
     /**
      * Show the form for creating a new resource.
      */
@@ -258,8 +272,9 @@ class OperationController extends Controller
     {
         $user = Auth::user();
         $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
-        $operation = Operation::where('id', $operationId)->where('doctor_id', $doctorId)->first();
-
+        $operation = Operation::with(['operationdetails.preference', 'operationdetails'])->where('id', $operationId)->where('doctor_id', $doctorId)->first();
+        logger($operation->operationdetails); // Log the operationdetails relationship
+        logger($operation->operationdetails->pluck('preference'));
         // Transform the result using the resource
         return new OperationResource($operation);
     }

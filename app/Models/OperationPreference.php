@@ -13,4 +13,8 @@ class OperationPreference extends Model
     {
         return $this->belongsTo(User::class, 'doctor_id');
     }
+    public function details()
+    {
+        return $this->hasMany(OperationDetail::class, 'operation_type', 'code');
+    }
 }

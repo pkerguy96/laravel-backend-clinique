@@ -15,12 +15,13 @@ class OperationDetailResource extends JsonResource
      */
     public function toArray($request)
     {
+        $operationType = $this->preference ? $this->preference->name : 'Unknown'; // Provide a default value if preference is null
 
 
         return [
             'id' => $this->id,
             'tooth_id' => $this->tooth_id,
-            'operation_type' => $this->operation_type,
+            'operation_type' => $operationType,
             'price' => $this->price,
         ];
     }

@@ -46,6 +46,7 @@ route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\API\v1', 'm
     Route::get('uploadsInfo', [fileuploadController::class, 'uploadsInfo']);
     /* operation update */
     route::patch('modifyoperationtreatment/{id}', [OperationController::class, 'modifyoperation']);
+    route::get('recurringOperation', [OperationController::class, 'recurringOperation']);
     route::patch('finishtreatment/{id}', [OperationController::class, 'treatmentisdone']);
     /* operation update */
 
