@@ -15,6 +15,6 @@ class OperationPreference extends Model
     }
     public function details()
     {
-        return $this->hasMany(OperationDetail::class, 'operation_type', 'code');
+        return $this->hasMany(OperationDetail::class, 'operation_type', 'operation_type');
     }
 }

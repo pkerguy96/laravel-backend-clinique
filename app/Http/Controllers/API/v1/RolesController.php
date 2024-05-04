@@ -22,14 +22,17 @@ class RolesController extends Controller
     {
         try {
             $user = Auth::user();
-
             setPermissionsTeamId($user);
-
             if ($user->role === 'nurse') {
                 return $this->error(null, 'Seuls les médecins sont autorisés à accéder.', 401);
             }
-
-            $roles = Role::where('team_id', $user->id)->with('users')->latest('created_at')->get();
+            $roles = Role::where('team_id', $user->id)
+                ->whereDoesntHave('users', function ($query) use ($user) {
+                    $query->where('id', $user->id);
+                })
+                ->with('users')
+                ->latest('created_at')
+                ->get();
             return new RoleCollection($roles);
         } catch (\Throwable $th) {
             $this->error($th->getMessage(), 'error', 501);
@@ -52,6 +55,8 @@ class RolesController extends Controller
                 return $this->error(null, 'Le rôle existe déjà', 409);
             }
             Role::create(['name' => $request->rolename, 'team_id' => $user->id]);
+            app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
             return $this->success(null, "Le rôle a été ajouté.", 201);
         } catch (RoleDoesNotExist $exception) {
             return $this->error(null, $exception->getMessage(), 500);
@@ -99,6 +104,7 @@ class RolesController extends Controller
                 $nurse->removeRole($singlerole);
             }
             $nurse->assignRole($request->rolename);
+            app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
             return $this->success(null, "L'autorisation a été mise à jour avec succès.", 201);
         } catch (RoleDoesNotExist $exception) {
@@ -122,11 +128,7 @@ class RolesController extends Controller
             }
             setPermissionsTeamId($user);
             //TODO: potential bug
-
-
             $role = Role::findByName($request->rolename);
-
-
             if (!$role) {
                 throw RoleDoesNotExist::named($request->rolename, 'sanctum');
             }
@@ -148,8 +150,9 @@ class RolesController extends Controller
             }
             setPermissionsTeamId($user);
             $role = Role::where('id', $id)->where('team_id', $user->id)->first();
-
             $role->delete();
+            app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
             return $this->success(null, 'deleted success', 201);
         } catch (\Throwable $th) {
             return $this->error(null, $th->getMessage(), 500);

@@ -21,7 +21,8 @@ class OperationDetailResource extends JsonResource
         return [
             'id' => $this->id,
             'tooth_id' => $this->tooth_id,
-            'operation_type' => $operationType,
+            'operation_type' => $this->operation_type,
+            'name' => $operationType,
             'price' => $this->price,
         ];
     }

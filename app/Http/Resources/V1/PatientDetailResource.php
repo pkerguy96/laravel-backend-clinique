@@ -57,6 +57,7 @@ class PatientDetailResource extends JsonResource
                         'tooth_id' => $operationType->tooth_id,
                         'operation_type' => $operationType->operation_type,
                         'price' => $operationType->price,
+                        'name' => $operationType->preference->name,
                     ];
                 }),
 

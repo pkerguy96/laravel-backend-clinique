@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('price', 10, 2);
             $table->timestamps();
             $table->foreign('operation_id')->references('id')->on('operations')->onDelete('cascade');
+            $table->foreign('operation_type')->references('operation_type')->on('operation_preferences')->onDelete('cascade');
         });
     }
 

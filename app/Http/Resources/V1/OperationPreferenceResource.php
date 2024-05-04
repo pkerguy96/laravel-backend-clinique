@@ -19,7 +19,8 @@ class OperationPreferenceResource extends JsonResource
             "id" => $this->id,
             "name" => $this->name,
             "price" => floatval($this->price),
-            "code" => $this->code,
+            "operation_type" => $this->operation_type,
         ];
     }
 }
+ 

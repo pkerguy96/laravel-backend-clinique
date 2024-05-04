@@ -98,7 +98,7 @@ class PatientController extends Controller
             return $permissionResult;
         }
         $doctor_id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
-        return  new PatientDetailResource(Patient::with('appointments', 'operations')->where('id', $id)->where('doctor_id', $doctor_id)->first());
+        return  new PatientDetailResource(Patient::with('appointments', 'operations', 'operations.operationdetails', 'operations.operationdetails.preference')->where('id', $id)->where('doctor_id', $doctor_id)->first());
     }
 
     /**

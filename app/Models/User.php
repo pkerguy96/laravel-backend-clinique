@@ -83,7 +83,7 @@ class User extends Authenticatable
     {
         parent::boot();
 
-
+        //TODO: mnin tms7 user remove the role
         static::created(function ($user) {
             // Create a new user preference row when a user is created
             UserPreference::create([
@@ -91,9 +91,13 @@ class User extends Authenticatable
                 'kpi_date' => 'year',
             ]);
             if ($user->role === 'doctor') {
+                setPermissionsTeamId($user);
                 $superAdminRole =   Role::create(['name' => 'Super-Admin', 'guard_name' => 'sanctum', 'team_id' => $user->id]);
                 $permissions = Permission::pluck('id')->toArray();
                 $superAdminRole->permissions()->sync($permissions);
+                $user->assignRole($superAdminRole);
+                app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
                 WaitingRoom::create([
                     'doctor_id' => $user->id,
                     'num_patients_waiting' => 0,

@@ -15,6 +15,6 @@ class OperationDetail extends Model
     }
     public function preference()
     {
-        return $this->belongsTo(OperationPreference::class, 'operation_type', 'code');
+        return $this->belongsTo(OperationPreference::class, 'operation_type', 'operation_type');
     }
 }

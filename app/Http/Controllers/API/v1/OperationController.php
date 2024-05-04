@@ -273,7 +273,7 @@ class OperationController extends Controller
         $user = Auth::user();
         $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
         $operation = Operation::with(['operationdetails.preference', 'operationdetails'])->where('id', $operationId)->where('doctor_id', $doctorId)->first();
-        logger($operation->operationdetails); // Log the operationdetails relationship
+
         logger($operation->operationdetails->pluck('preference'));
         // Transform the result using the resource
         return new OperationResource($operation);

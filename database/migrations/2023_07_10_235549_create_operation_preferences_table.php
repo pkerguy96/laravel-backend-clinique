@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('doctor_id');
             $table->string('name');
-            $table->string('code')->unique();
+            $table->string('operation_type')->unique();
             $table->decimal('price', 10, 2);
             $table->timestamps();
             $table->foreign('doctor_id')->references('id')->on('users')->onDelete('cascade');

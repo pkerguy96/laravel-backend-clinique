@@ -93,7 +93,7 @@ class NurseController extends Controller
     public function show(string $id)
     {
         //
-        //TODO: add nurses lol
+
     }
 
     /**
