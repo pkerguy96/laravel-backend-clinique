@@ -126,6 +126,7 @@ class fileuploadController extends Controller
     {
         //TODO: THIS NEEDS TO BE MORE SECURE IN THE FUTURE also permission on this one 
         $retreived_id = $request->query('userId');
+        logger($retreived_id);
         $test = User::findorfail($retreived_id);
         if ($test->role === 'nurse') {
             $doctor_id = $test->doctor_id;

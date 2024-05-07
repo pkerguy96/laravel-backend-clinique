@@ -303,7 +303,8 @@ class OperationController extends Controller
     {
         $user = Auth::user();
         $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
-        $operation = Operation::where('doctor_id', $doctorId)->where('id', $id)->pluck('is_paid');
+        $operation = (int) Operation::where('doctor_id', $doctorId)->where('id', $id)->pluck('is_paid')->first();
+
         return response()->json(['data' => $operation]);
     }
 }

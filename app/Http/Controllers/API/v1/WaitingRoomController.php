@@ -21,7 +21,7 @@ class WaitingRoomController extends Controller
         try {
             $user = Auth::user();
             $doctorId = ($user->role === 'nurse') ? $user->doctor_id : $user->id;
-            $patientswaiting = WaitingRoom::where('doctor_id', $doctorId)->pluck('num_patients_waiting');
+            $patientswaiting = (int) WaitingRoom::where('doctor_id', $doctorId)->pluck('num_patients_waiting')->first();
             return $this->success($patientswaiting, 'success', 201);
         } catch (\Throwable $th) {
             $this->error($th->getMessage(), 'oops', 500);

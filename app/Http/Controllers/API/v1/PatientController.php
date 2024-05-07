@@ -22,7 +22,7 @@ class PatientController extends Controller
      * Display a listing of the resource.
      */
     //TODO: CIN FIX CHECK AGE IF REQUIRED OR NOT 
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         $permissionResult = $this->checkPermission('access_patient');
@@ -30,7 +30,12 @@ class PatientController extends Controller
             return $permissionResult;
         }
         $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
-        return new PatientCollection(Patient::with('appointments', 'Ordonance')->where('doctor_id', $id)->orderBy('id', 'desc')->get());
+        $patients = Patient::with('appointments', 'Ordonance')
+            ->where('doctor_id', $id)
+            ->orderBy('id', 'desc')
+            ->paginate($request->get('per_page', 10)); // Set default per page as 10 or pass it as a parameter
+
+        return new PatientCollection($patients);
     }
 
     /**

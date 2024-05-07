@@ -21,7 +21,7 @@ class OperationCollection extends ResourceCollection
             $totalAmountPaid = $operation->payments->sum('amount_paid');
 
             return [
-                'isPaid' => $operation->is_paid,
+                'isPaid' =>  (bool) $operation->is_paid,
                 'id' => $operation->id,
                 'patient_id' => $operation->patient_id,
                 'nom' => $operation->patient->nom,
