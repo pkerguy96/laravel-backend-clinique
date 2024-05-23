@@ -13,6 +13,7 @@ use App\Traits\PermissionCheck;
 use App\Traits\PermissionCheckTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 
 class PatientController extends Controller
 {
@@ -30,10 +31,36 @@ class PatientController extends Controller
             return $permissionResult;
         }
         $id = ($user->role === 'doctor') ? $user->id : $user->doctor_id;
-        $patients = Patient::with('appointments', 'Ordonance')
-            ->where('doctor_id', $id)
-            ->orderBy('id', 'desc')
-            ->paginate($request->get('per_page', 10)); // Set default per page as 10 or pass it as a parameter
+        ds()->queriesOn('checking a user query');
+
+        $searchQuery = $request->input('searchQuery');
+
+
+        $patients = Cache::remember('patients-index' . 'id' . $id . $request->get('page', 1), 86400, function () use ($id, $request) {
+            return  Patient::with('appointments', 'Ordonance')
+                ->where('doctor_id', $id)
+                ->orderBy('id', 'desc')
+                ->paginate($request->get('per_page', 20));
+        });
+        if (!empty($searchQuery)) {
+            // If there's a search query, apply search filters
+            $patients = Patient::with('appointments', 'Ordonance')
+                ->where('doctor_id', $id)
+                ->where(function ($query) use ($searchQuery) {
+                    $query->where('nom', 'like', "%{$searchQuery}%")
+                        ->orWhere('prenom', 'like', "%{$searchQuery}%");
+                    // Add more fields to search if necessary
+                })
+                ->orderBy('id', 'desc')
+                ->paginate($request->get('per_page', 20));
+        }
+
+
+
+
+
+
+        ds()->queriesOff();
 
         return new PatientCollection($patients);
     }

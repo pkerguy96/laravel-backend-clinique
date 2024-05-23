@@ -32,19 +32,19 @@ Route::post('/api/v1/reset', [PasswordResetController::class, 'resetPassword'])-
 
 Route::get('/setup', function () {
     $credentials = [
-        'email' => 'admin3@admin.com',
+        'email' => 'admin4@admin.com',
         'password' => 'password',
     ];
     if (!Auth::attempt($credentials)) {
         $user = new User();
         $user->nom = 'Admin';
         $user->prenom = 'Admin';
-        $user->cin = 'zaba';
+        $user->cin = 'zabadww';
         $user->date = '2023-12-31';
         $user->address = 'Admin';
         $user->sex = 'male';
         $user->role = 'doctor';
-        $user->phone_number = '0660605606';
+        $user->phone_number = '06680605606';
         $user->email = $credentials['email'];
         $user->password =  bcrypt($credentials['password']);
         $user->save();
